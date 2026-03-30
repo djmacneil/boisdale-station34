@@ -24,7 +24,7 @@
  */
 
 const CONFIG = {
-  GOOGLE_API_KEY: GOOGLE_API_KEY,
+  GOOGLE_API_KEY: "AIzaSyBa1_oFkcarJA6wZRTSw0mm5r3eFyUTsac",
   // The main content spreadsheet
   SPREADSHEET_ID: "1jlcWZnge9bEFGr0GIK2FfgYfcXLS5WtNkZXNKINYryw",
 
