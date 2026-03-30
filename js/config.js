@@ -55,7 +55,7 @@ const CONFIG = {
     PHONE:      "(902) 555-0100",
     EMAIL:      "boisdalevfd@gmail.com",
     // Colors (CSS hex)
-    COLOR_PRIMARY: "#c0392b",   // fire red
+    COLOR_PRIMARY: "#1a5c2a",   // dark green
     COLOR_DARK:    "#1a1a1a",
     COLOR_LIGHT:   "#f8f5f0",
   },

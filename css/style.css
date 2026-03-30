@@ -7,8 +7,8 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --primary:   #c0392b;
-  --primary-dk:#922b21;
+  --primary:   #1a5c2a;
+  --primary-dk:#113d1c;
   --dark:      #1a1a1a;
   --mid:       #4a4a4a;
   --light:     #f8f5f0;
