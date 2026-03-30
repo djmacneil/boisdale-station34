@@ -32,6 +32,7 @@ const CONFIG = {
   SHEETS: {
     NOTICES:   "Notices",
     EVENTS:    "Events",
+    MEETINGS:  "Meetings",
     PROJECTS:  "Projects",
     MINUTES:   "Minutes",
     COMMUNITY: "Community",

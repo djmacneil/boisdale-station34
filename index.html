@@ -40,6 +40,19 @@
 
       <h2 class="page-title"><a href="pages/events.html">Upcoming Events</a></h2>
       <div id="events-container" class="card-grid"></div>
+      <p style="margin-top:1rem;font-family:var(--font-ui);font-size:.9rem;">
+        <a href="pages/calendar.html">View full calendar →</a>
+      </p>
+
+      <br>
+
+      <h2 class="page-title">Meeting Notices</h2>
+      <div id="meetings-container" class="card-grid"></div>
+
+      <br>
+
+      <h2 class="page-title"><a href="pages/community.html">Community Notices</a></h2>
+      <div id="community-container" class="card-grid"></div>
 
       <br>
 
@@ -109,6 +122,16 @@
         }
       })
       .catch(e => UI.showError("events-container", "Could not load events. " + e.message));
+
+    UI.showLoading("meetings-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
+      .then(rows => UI.renderCards("meetings-container", rows, { emptyMessage: "No meeting notices at this time." }))
+      .catch(e  => UI.showError("meetings-container", "Could not load meeting notices. " + e.message));
+
+    UI.showLoading("community-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.COMMUNITY)
+      .then(rows => UI.renderCards("community-container", rows.slice(0, 4), { emptyMessage: "No community notices at this time." }))
+      .catch(e  => UI.showError("community-container", "Could not load community notices. " + e.message));
 
     UI.showLoading("projects-container");
     GoogleAPI.fetchFiltered(CONFIG.SHEETS.PROJECTS)

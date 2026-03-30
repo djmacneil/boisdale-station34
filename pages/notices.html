@@ -45,7 +45,7 @@
     document.title = "Notices — " + CONFIG.SITE.HALL_SHORT;
     UI.showLoading("notices-container");
     GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES)
-      .then(rows => UI.renderCards("notices-container", rows, { emptyMessage: "No active notices at this time." }))
+      .then(rows => UI.renderCards("notices-container", rows, { emptyMessage: "No active notices at this time.", hideAuthor: true, hideExpires: true }))
       .catch(e  => UI.showError("notices-container", e.message));
   </script>
 </body>

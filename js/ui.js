@@ -39,9 +39,9 @@ const UI = (() => {
         <h3 class="card-title">${escHtml(row.title || "Untitled")}</h3>
         ${row.body ? `<div class="card-body">${formatBody(row.body)}</div>` : ""}
         <footer class="card-meta">
-          ${row.author    ? `<span>${escHtml(row.author)}</span>` : ""}
+          ${!options.hideAuthor  && row.author    ? `<span>${escHtml(row.author)}</span>` : ""}
           ${row.start_date? `<span>${formatDate(row.start_date)}</span>` : ""}
-          ${row.end_date  ? `<span class="expires">Expires ${formatDate(row.end_date)}</span>` : ""}
+          ${!options.hideExpires && row.end_date  ? `<span class="expires">Expires ${formatDate(row.end_date)}</span>` : ""}
         </footer>
       </article>
     `).join("");
