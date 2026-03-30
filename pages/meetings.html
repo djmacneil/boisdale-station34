@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meetings</title>
+  <title>Fire Dept. Notices</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="page-wrap">
@@ -13,7 +13,7 @@
       <nav>
         <a href="../index.html">Home</a>
         <a href="notices.html">Notices</a>
-        <a href="meetings.html" class="active">Meetings</a>
+        <a href="meetings.html" class="active">Fire Dept.</a>
         <a href="calendar.html">Calendar</a>
         <a href="projects.html">Projects</a>
         <a href="minutes.html">Minutes</a>
@@ -23,9 +23,9 @@
   </header>
   <main>
     <div class="container">
-      <h1 class="page-title">Meetings</h1>
+      <h1 class="page-title">Fire Department Notices</h1>
       <p style="color:#666;margin-bottom:1.5rem;font-size:.95rem;">
-        Upcoming and current meeting notices.
+        Upcoming and current fire department notices.
       </p>
       <div id="meetings-container" class="card-grid"></div>
     </div>
@@ -42,7 +42,7 @@
   <script src="../js/google-api.js"></script>
   <script src="../js/ui.js"></script>
   <script>
-    document.title = "Meetings — " + CONFIG.SITE.HALL_SHORT;
+    document.title = "Fire Dept. Notices — " + CONFIG.SITE.HALL_SHORT;
     UI.showLoading("meetings-container");
     GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
       .then(rows => UI.renderCards("meetings-container", rows, { emptyMessage: "No meeting notices at this time." }))

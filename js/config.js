@@ -31,9 +31,8 @@ const CONFIG = {
   // Sheet tab names inside the spreadsheet
   SHEETS: {
     NOTICES:   "Notices",
-    MEETINGS:  "Meetings",
+    MEETINGS:  "FireDept",
     PROJECTS:  "Projects",
-    MINUTES:   "Minutes",
     COMMUNITY: "Community",
   },
 
