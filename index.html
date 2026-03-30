@@ -28,20 +28,22 @@
     <p>Serving our community — notices, events, meeting minutes &amp; more</p>
   </div>
 
+  <div class="notices-ticker" id="notices-ticker">
+    <div class="ticker-label">⚠ Notice</div>
+    <div class="ticker-wrap">
+      <div class="ticker-inner" id="notices-container"></div>
+    </div>
+  </div>
+
   <main>
     <div class="container">
 
-      <h2 class="page-title">Current Notices</h2>
-      <div id="notices-container" class="card-grid"></div>
-
-      <br>
-
-      <h2 class="page-title">Upcoming Events</h2>
+      <h2 class="page-title"><a href="pages/events.html">Upcoming Events</a></h2>
       <div id="events-container" class="card-grid"></div>
 
       <br>
 
-      <h2 class="page-title">Project Updates</h2>
+      <h2 class="page-title"><a href="pages/projects.html">Project Updates</a></h2>
       <div id="projects-container" class="card-grid"></div>
 
     </div>
@@ -60,10 +62,15 @@
   <script src="js/google-api.js"></script>
   <script src="js/ui.js"></script>
   <script>
-    UI.showLoading("notices-container");
     GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES)
-      .then(rows => UI.renderCards("notices-container", rows, { emptyMessage: "No active notices." }))
-      .catch(e  => UI.showError("notices-container", "Could not load notices. " + e.message));
+      .then(rows => {
+        if (rows.length === 0) return;
+        const ticker = document.getElementById("notices-ticker");
+        const inner  = document.getElementById("notices-container");
+        inner.textContent = rows.map(r => r.title).join("     ★     ");
+        ticker.style.display = "flex";
+      })
+      .catch(e => console.warn("Could not load notices:", e.message));
 
     UI.showLoading("events-container");
     GoogleAPI.fetchSheet(CONFIG.SHEETS.EVENTS)

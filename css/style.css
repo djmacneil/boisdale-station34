@@ -95,6 +95,49 @@ nav a:hover, nav a.active {
   text-decoration: none;
 }
 
+/* ── Notices ticker ───────────────────────────────────────────── */
+.notices-ticker {
+  background: #b7400a;
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: .88rem;
+  display: none;
+  align-items: stretch;
+  overflow: hidden;
+  line-height: 2.5rem;
+}
+
+.ticker-label {
+  background: rgba(0,0,0,.28);
+  padding: 0 1.1rem;
+  font-weight: 700;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-wrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.ticker-inner {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 2rem;
+  animation: ticker-scroll 30s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(100vw); }
+  to   { transform: translateX(-100%); }
+}
+
 /* ── Hero banner (home page) ──────────────────────────────────── */
 .hero {
   background: var(--primary);
@@ -119,6 +162,15 @@ nav a:hover, nav a.active {
   border-left: 4px solid var(--primary);
   padding-left: .75rem;
   margin-bottom: 1.75rem;
+}
+
+.page-title a {
+  color: var(--dark);
+  text-decoration: none;
+}
+.page-title a:hover {
+  color: var(--primary);
+  text-decoration: none;
 }
 
 /* ── Cards ────────────────────────────────────────────────────── */
