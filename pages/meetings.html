@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Notices</title>
+  <title>Meetings</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="page-wrap">
@@ -12,8 +12,8 @@
       <div class="site-title">🔥 Boisdale Station 34</div>
       <nav>
         <a href="../index.html">Home</a>
-        <a href="notices.html" class="active">Notices</a>
-        <a href="meetings.html">Meetings</a>
+        <a href="notices.html">Notices</a>
+        <a href="meetings.html" class="active">Meetings</a>
         <a href="calendar.html">Calendar</a>
         <a href="projects.html">Projects</a>
         <a href="minutes.html">Minutes</a>
@@ -23,11 +23,11 @@
   </header>
   <main>
     <div class="container">
-      <h1 class="page-title">Notices &amp; Announcements</h1>
+      <h1 class="page-title">Meetings</h1>
       <p style="color:#666;margin-bottom:1.5rem;font-size:.95rem;">
-        Only notices active today are shown. Expired notices are hidden automatically.
+        Upcoming and current meeting notices.
       </p>
-      <div id="notices-container" class="card-grid"></div>
+      <div id="meetings-container" class="card-grid"></div>
     </div>
   </main>
   <footer id="site-footer">
@@ -42,11 +42,11 @@
   <script src="../js/google-api.js"></script>
   <script src="../js/ui.js"></script>
   <script>
-    document.title = "Notices — " + CONFIG.SITE.HALL_SHORT;
-    UI.showLoading("notices-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES)
-      .then(rows => UI.renderCards("notices-container", rows, { emptyMessage: "No active notices at this time.", hideAuthor: true, hideExpires: true }))
-      .catch(e  => UI.showError("notices-container", e.message));
+    document.title = "Meetings — " + CONFIG.SITE.HALL_SHORT;
+    UI.showLoading("meetings-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
+      .then(rows => UI.renderCards("meetings-container", rows, { emptyMessage: "No meeting notices at this time." }))
+      .catch(e   => UI.showError("meetings-container", e.message));
   </script>
 </body>
 </html>
