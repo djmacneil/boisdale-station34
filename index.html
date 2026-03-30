@@ -92,7 +92,7 @@
       .catch(e => console.warn("Could not load notices:", e.message));
 
     UI.showLoading("events-container");
-    GoogleAPI.fetchCalendarEvents(CONFIG.CALENDAR_ID)
+    GoogleAPI.fetchCalendarEvents(CONFIG.CALENDAR_ID, 30)
       .then(events => UI.renderEventsTable("events-container", events))
       .catch(e => UI.showError("events-container", "Could not load events. " + e.message));
 

@@ -120,10 +120,9 @@ const GoogleAPI = (() => {
    * Fetch upcoming events from Google Calendar for the next N months.
    * Returns the raw event items array from the Calendar API.
    */
-  async function fetchCalendarEvents(calendarId, months = 2) {
+  async function fetchCalendarEvents(calendarId, days = 60) {
     const now   = new Date();
-    const later = new Date();
-    later.setMonth(later.getMonth() + months);
+    const later = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`
       + `?key=${CONFIG.GOOGLE_API_KEY}`
       + `&timeMin=${encodeURIComponent(now.toISOString())}`
