@@ -80,7 +80,7 @@
         if (rows.length === 0) return;
         const ticker = document.getElementById("notices-ticker");
         const inner  = document.getElementById("notices-container");
-        inner.textContent = rows.map(r => r.body ? `${r.title}: ${r.body}` : r.title).join("     |     ");
+        inner.textContent = rows.map(r => r.body ? `-= ${r.title}: ${r.body} =-` : `-= ${r.title} =-`).join("     ✦     ");
         ticker.style.display = "flex";
       })
       .catch(e => console.warn("Could not load notices:", e.message));
