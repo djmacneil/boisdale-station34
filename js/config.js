@@ -39,13 +39,13 @@ const CONFIG = {
 
   // Drive folder IDs — one per section
   DRIVE_FOLDERS: {
-    MINUTES:  "YOUR_MINUTES_FOLDER_ID",
-    PROJECTS: "YOUR_PROJECTS_FOLDER_ID",
-    GENERAL:  "YOUR_GENERAL_FOLDER_ID",
+    MINUTES:  "1UpvbAHhwL-PiGX7Wy-3xl4NLUxY2DDOM",
+    PROJECTS: "1nII7pqZ-2EDtFu-Yk4C6ks58A-r3SBwT",
+    GENERAL:  "1_z8XoK31ziDt-ekBPRKyLj0LHaBwtn3e",
   },
 
   // Google Calendar ID
-  CALENDAR_ID: "YOUR_CALENDAR_ID_HERE",
+  CALENDAR_ID: "6b0ea6f3876b6821ba60b35c25bc35e30ea09ec19de7d586fb4599681f28fd03@group.calendar.google.com",
 
   // Site branding
   SITE: {
