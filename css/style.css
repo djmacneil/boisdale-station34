@@ -256,7 +256,8 @@ nav a:hover, nav a.active {
 }
 
 .events-table tr:last-child td { border-bottom: none; }
-.events-table tr:nth-child(even) td { background: #f5f5f5; }
+.events-table td.ev-date { border-top: 2px solid var(--border); }
+.events-table tr:first-child td.ev-date { border-top: none; }
 
 .ev-date { white-space: nowrap; font-weight: 600; color: var(--dark); }
 .ev-time { white-space: nowrap; color: var(--mid); }

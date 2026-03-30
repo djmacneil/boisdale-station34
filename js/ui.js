@@ -80,17 +80,26 @@ const UI = (() => {
     if (!el) return;
     if (!events.length) { showEmpty(containerId, "No upcoming events."); return; }
 
-    const rows = events.map(ev => {
+    // Group events by date
+    const groups = {};
+    const dateKeys = [];
+    events.forEach(ev => {
       const isAllDay = !!ev.start.date;
       const startDt  = isAllDay ? new Date(ev.start.date + "T00:00:00") : new Date(ev.start.dateTime);
       const endDt    = isAllDay ? null : new Date(ev.end.dateTime);
-      const dateStr  = startDt.toLocaleDateString("en-CA", { weekday: "short", year: "numeric", month: "long", day: "numeric" });
+      const dateKey  = startDt.toLocaleDateString("en-CA", { weekday: "short", year: "numeric", month: "long", day: "numeric" });
       const timeStr  = isAllDay ? "All day" : `${_fmtTime(startDt)} – ${_fmtTime(endDt)}`;
-      return `<tr>
-        <td class="ev-date">${dateStr}</td>
-        <td class="ev-time">${timeStr}</td>
-        <td class="ev-title">${escHtml(ev.summary || "Untitled")}</td>
-      </tr>`;
+      if (!groups[dateKey]) { groups[dateKey] = []; dateKeys.push(dateKey); }
+      groups[dateKey].push({ timeStr, title: ev.summary || "Untitled" });
+    });
+
+    const rows = dateKeys.map(date => {
+      const eventsForDay = groups[date];
+      return eventsForDay.map((ev, i) => `<tr>
+        ${i === 0 ? `<td class="ev-date" rowspan="${eventsForDay.length}">${date}</td>` : ""}
+        <td class="ev-time">${ev.timeStr}</td>
+        <td class="ev-title">${escHtml(ev.title)}</td>
+      </tr>`).join("");
     }).join("");
 
     el.innerHTML = `<table class="events-table">
