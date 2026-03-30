@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meeting Minutes</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="page-wrap">
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Northside Volunteer Fire Department</div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="notices.html">Notices</a>
+        <a href="events.html">Events</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="projects.html">Projects</a>
+        <a href="minutes.html" class="active">Minutes</a>
+        <a href="community.html">Community</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <h1 class="page-title">Meeting Minutes</h1>
+      <p style="color:#666;margin-bottom:1.5rem;font-size:.95rem;">
+        Minutes are uploaded to a shared Google Drive folder after each meeting.
+        Click any document to open it in Google Docs or download as PDF.
+      </p>
+
+      <div class="section-panel">
+        <h2>📄 Minutes Archive</h2>
+        <div id="minutes-container"></div>
+      </div>
+    </div>
+  </main>
+  <footer id="site-footer">
+    <div class="container">
+      Northside Volunteer Fire Department &nbsp;·&nbsp;
+      123 Station Road, Northside, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:info@northsidevfd.ca">info@northsidevfd.ca</a>
+    </div>
+  </footer>
+  <script src="../js/config.js"></script>
+  <script src="../js/google-api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.title = "Minutes — " + CONFIG.SITE.HALL_SHORT;
+    UI.showLoading("minutes-container");
+    GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.MINUTES)
+      .then(files => UI.renderFileList("minutes-container", files))
+      .catch(e    => UI.showError("minutes-container", e.message));
+  </script>
+</body>
+</html>

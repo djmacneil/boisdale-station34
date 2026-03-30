@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Events</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .filter-bar {
+      display: flex; gap: .75rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .filter-bar button {
+      font-family: var(--font-ui); font-size: .82rem;
+      padding: .35rem .8rem; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--white);
+      cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .filter-bar button.active,
+    .filter-bar button:hover {
+      background: var(--primary); color: #fff; border-color: var(--primary);
+    }
+  </style>
+</head>
+<body class="page-wrap">
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Northside Volunteer Fire Department</div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="notices.html">Notices</a>
+        <a href="events.html" class="active">Events</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="projects.html">Projects</a>
+        <a href="minutes.html">Minutes</a>
+        <a href="community.html">Community</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <h1 class="page-title">Events</h1>
+
+      <div class="filter-bar" id="filter-bar">
+        <button class="active" data-filter="all">All</button>
+        <!-- Category buttons injected by JS -->
+      </div>
+
+      <div id="events-container" class="card-grid"></div>
+    </div>
+  </main>
+  <footer id="site-footer">
+    <div class="container">
+      Northside Volunteer Fire Department &nbsp;·&nbsp;
+      123 Station Road, Northside, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:info@northsidevfd.ca">info@northsidevfd.ca</a>
+    </div>
+  </footer>
+  <script src="../js/config.js"></script>
+  <script src="../js/google-api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.title = "Events — " + CONFIG.SITE.HALL_SHORT;
+    let allEvents = [];
+
+    UI.showLoading("events-container");
+    GoogleAPI.fetchUpcoming(CONFIG.SHEETS.EVENTS)
+      .then(rows => {
+        allEvents = rows.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+        buildCategoryFilters(allEvents);
+        renderFiltered("all");
+      })
+      .catch(e => UI.showError("events-container", e.message));
+
+    function buildCategoryFilters(rows) {
+      const cats = [...new Set(rows.map(r => r.category).filter(Boolean))];
+      const bar = document.getElementById("filter-bar");
+      cats.forEach(c => {
+        const btn = document.createElement("button");
+        btn.textContent = c;
+        btn.dataset.filter = c;
+        btn.onclick = () => {
+          document.querySelectorAll(".filter-bar button").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderFiltered(c);
+        };
+        bar.appendChild(btn);
+      });
+      document.querySelector('[data-filter="all"]').onclick = () => {
+        document.querySelectorAll(".filter-bar button").forEach(b => b.classList.remove("active"));
+        document.querySelector('[data-filter="all"]').classList.add("active");
+        renderFiltered("all");
+      };
+    }
+
+    function renderFiltered(cat) {
+      const filtered = cat === "all" ? allEvents : allEvents.filter(r => r.category === cat);
+      UI.renderCards("events-container", filtered, { emptyMessage: "No events found." });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendar</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .cal-controls {
+      display: flex; gap: .5rem; margin-bottom: 1.25rem;
+    }
+    .cal-controls button {
+      font-family: var(--font-ui); font-size: .82rem;
+      padding: .35rem .8rem; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--white);
+      cursor: pointer; transition: background .15s;
+    }
+    .cal-controls button.active,
+    .cal-controls button:hover {
+      background: var(--primary); color: #fff; border-color: var(--primary);
+    }
+    .cal-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  </style>
+</head>
+<body class="page-wrap">
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Northside Volunteer Fire Department</div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="notices.html">Notices</a>
+        <a href="events.html">Events</a>
+        <a href="calendar.html" class="active">Calendar</a>
+        <a href="projects.html">Projects</a>
+        <a href="minutes.html">Minutes</a>
+        <a href="community.html">Community</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <h1 class="page-title">Calendar</h1>
+
+      <div class="cal-controls">
+        <button class="active" onclick="switchView('MONTH', this)">Month</button>
+        <button onclick="switchView('WEEK',  this)">Week</button>
+        <button onclick="switchView('AGENDA',this)">Agenda</button>
+      </div>
+
+      <div class="cal-wrap">
+        <div id="calendar-container"></div>
+      </div>
+
+      <p style="font-size:.82rem;color:#888;margin-top:.75rem;">
+        Events are managed in Google Calendar. Contact the administrator to have events added.
+      </p>
+    </div>
+  </main>
+  <footer id="site-footer">
+    <div class="container">
+      Northside Volunteer Fire Department &nbsp;·&nbsp;
+      123 Station Road, Northside, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:info@northsidevfd.ca">info@northsidevfd.ca</a>
+    </div>
+  </footer>
+  <script src="../js/config.js"></script>
+  <script src="../js/google-api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.title = "Calendar — " + CONFIG.SITE.HALL_SHORT;
+    UI.renderCalendar("calendar-container", CONFIG.CALENDAR_ID, "MONTH");
+
+    function switchView(mode, btn) {
+      document.querySelectorAll(".cal-controls button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      UI.renderCalendar("calendar-container", CONFIG.CALENDAR_ID, mode);
+    }
+  </script>
+</body>
+</html>

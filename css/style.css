@@ -1,0 +1,276 @@
+/* ═══════════════════════════════════════════════════════════════
+   Firehall Community Website — Main Stylesheet
+   Colours and name come from config.js via CSS variables set on load.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:   #c0392b;
+  --primary-dk:#922b21;
+  --dark:      #1a1a1a;
+  --mid:       #4a4a4a;
+  --light:     #f8f5f0;
+  --white:     #ffffff;
+  --border:    #ddd;
+  --radius:    6px;
+  --shadow:    0 2px 8px rgba(0,0,0,.10);
+  --font-body: 'Georgia', serif;
+  --font-ui:   'Trebuchet MS', sans-serif;
+  --max-w:     1100px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--dark);
+  background: var(--light);
+}
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; height: auto; }
+
+/* ── Layout ───────────────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 1.5rem; }
+
+.page-wrap { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; padding: 2.5rem 0 4rem; }
+
+/* ── Header / Nav ─────────────────────────────────────────────── */
+#site-header {
+  background: var(--dark);
+  color: var(--white);
+  border-top: 4px solid var(--primary);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .85rem 1.5rem;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.site-title {
+  font-family: var(--font-ui);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.site-title .badge-red {
+  background: var(--primary);
+  color: #fff;
+  font-size: .7rem;
+  padding: .15rem .45rem;
+  border-radius: 3px;
+  letter-spacing: .05em;
+}
+
+nav { display: flex; gap: .15rem; flex-wrap: wrap; }
+
+nav a {
+  font-family: var(--font-ui);
+  font-size: .85rem;
+  color: #ccc;
+  padding: .4rem .75rem;
+  border-radius: var(--radius);
+  transition: background .15s, color .15s;
+}
+nav a:hover, nav a.active {
+  background: rgba(255,255,255,.1);
+  color: var(--white);
+  text-decoration: none;
+}
+
+/* ── Hero banner (home page) ──────────────────────────────────── */
+.hero {
+  background: var(--primary);
+  color: var(--white);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+.hero h1 {
+  font-family: var(--font-ui);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: .5rem;
+}
+.hero p { font-size: 1.05rem; opacity: .9; }
+
+/* ── Page title ───────────────────────────────────────────────── */
+.page-title {
+  font-family: var(--font-ui);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--dark);
+  border-left: 4px solid var(--primary);
+  padding-left: .75rem;
+  margin-bottom: 1.75rem;
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.4rem;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.card-title {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: .5rem;
+  color: var(--dark);
+}
+
+.card-body { font-size: .95rem; color: var(--mid); }
+
+.card-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: .8rem;
+  color: #888;
+  margin-top: .85rem;
+  padding-top: .6rem;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.expires { color: var(--primary); }
+
+/* ── Badge ────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  background: var(--primary);
+  color: #fff;
+  padding: .15rem .55rem;
+  border-radius: 3px;
+  margin-bottom: .55rem;
+}
+
+/* ── File list ────────────────────────────────────────────────── */
+.file-list { list-style: none; }
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .65rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.file-item:last-child { border-bottom: none; }
+
+.file-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+.file-name {
+  flex: 1;
+  font-size: .95rem;
+  font-family: var(--font-ui);
+}
+
+.file-meta {
+  font-size: .8rem;
+  color: #888;
+  white-space: nowrap;
+}
+
+/* ── Loading / Error / Empty ──────────────────────────────────── */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  color: var(--mid);
+  padding: 1.5rem 0;
+  font-size: .95rem;
+  font-family: var(--font-ui);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  flex-shrink: 0;
+}
+
+.error-msg {
+  background: #fdf3f2;
+  border: 1px solid #f5c6c2;
+  border-radius: var(--radius);
+  padding: .85rem 1rem;
+  color: #922b21;
+  font-size: .9rem;
+  font-family: var(--font-ui);
+}
+
+.empty-msg {
+  color: #888;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+/* ── Sections with Drive folder ───────────────────────────────── */
+.section-panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+
+.section-panel h2 {
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--dark);
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+footer {
+  background: var(--dark);
+  color: #aaa;
+  font-family: var(--font-ui);
+  font-size: .82rem;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
+footer a { color: #ccc; }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .header-inner { flex-direction: column; align-items: flex-start; }
+  nav { gap: .05rem; }
+  .hero h1 { font-size: 1.4rem; }
+  .card-grid { grid-template-columns: 1fr; }
+}

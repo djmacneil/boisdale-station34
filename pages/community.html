@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community Information</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="page-wrap">
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Northside Volunteer Fire Department</div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="notices.html">Notices</a>
+        <a href="events.html">Events</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="projects.html">Projects</a>
+        <a href="minutes.html">Minutes</a>
+        <a href="community.html" class="active">Community</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <h1 class="page-title">Community Information</h1>
+
+      <div id="community-container" class="card-grid"></div>
+
+      <br>
+
+      <div class="section-panel">
+        <h2>📁 Community Documents</h2>
+        <div id="drive-container"></div>
+      </div>
+    </div>
+  </main>
+  <footer id="site-footer">
+    <div class="container">
+      Northside Volunteer Fire Department &nbsp;·&nbsp;
+      123 Station Road, Northside, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:info@northsidevfd.ca">info@northsidevfd.ca</a>
+    </div>
+  </footer>
+  <script src="../js/config.js"></script>
+  <script src="../js/google-api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.title = "Community — " + CONFIG.SITE.HALL_SHORT;
+
+    UI.showLoading("community-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.COMMUNITY)
+      .then(rows => UI.renderCards("community-container", rows, { emptyMessage: "No community information posted." }))
+      .catch(e  => UI.showError("community-container", e.message));
+
+    UI.showLoading("drive-container");
+    GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.GENERAL)
+      .then(files => UI.renderFileList("drive-container", files))
+      .catch(e    => UI.showError("drive-container", e.message));
+  </script>
+</body>
+</html>

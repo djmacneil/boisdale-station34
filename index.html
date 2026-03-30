@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home — Northside VFD</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-wrap">
+
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Boisdale Station 34</div>
+      <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="pages/notices.html">Notices</a>
+        <a href="pages/events.html">Events</a>
+        <a href="pages/calendar.html">Calendar</a>
+        <a href="pages/projects.html">Projects</a>
+        <a href="pages/minutes.html">Minutes</a>
+        <a href="pages/community.html">Community</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Boisdale Station 34</h1>
+    <p>Serving our community — notices, events, meeting minutes &amp; more</p>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <h2 class="page-title">Current Notices</h2>
+      <div id="notices-container" class="card-grid"></div>
+
+      <br>
+
+      <h2 class="page-title">Upcoming Events</h2>
+      <div id="events-container" class="card-grid"></div>
+
+      <br>
+
+      <h2 class="page-title">Project Updates</h2>
+      <div id="projects-container" class="card-grid"></div>
+
+    </div>
+  </main>
+
+  <footer id="site-footer">
+    <div class="container">
+      Northside Volunteer Fire Department &nbsp;·&nbsp;
+      3810 Grand Narrows Highway, Boisdale, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:boisdalevfd@gmail.com">boisdalevfd@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/google-api.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    UI.showLoading("notices-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES)
+      .then(rows => UI.renderCards("notices-container", rows, { emptyMessage: "No active notices." }))
+      .catch(e  => UI.showError("notices-container", "Could not load notices. " + e.message));
+
+    UI.showLoading("events-container");
+    GoogleAPI.fetchSheet(CONFIG.SHEETS.EVENTS)
+      .then(rows => {
+        console.log("=== EVENTS DEBUG ===");
+        console.log("Total rows from sheet:", rows.length);
+        console.log("Raw rows:", JSON.stringify(rows, null, 2));
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        console.log("Today (midnight):", today.toISOString());
+
+        rows.forEach((r, i) => {
+          const raw = r.start_date;
+          const parsed = new Date(r.start_date);
+          console.log(`Row ${i}: title="${r.title}" start_date="${raw}" parsed=${parsed} isValid=${!isNaN(parsed)} >= today: ${parsed >= today}`);
+        });
+
+        const upcoming = rows
+          .filter(r => {
+            if (!r.start_date) return false;
+            const [y, m, d] = r.start_date.split("-").map(Number);
+            return new Date(y, m - 1, d) >= today;
+          })
+          .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+          .slice(0, 5);
+        console.log("After filter, upcoming count:", upcoming.length);
+
+        console.log("Upcoming rows to render:", JSON.stringify(upcoming, null, 2));
+        try {
+          UI.renderCards("events-container", upcoming, { emptyMessage: "No upcoming events." });
+          console.log("renderCards completed OK");
+        } catch(err) {
+          console.error("renderCards threw an error:", err);
+          UI.showError("events-container", "Render error: " + err.message);
+        }
+      })
+      .catch(e => UI.showError("events-container", "Could not load events. " + e.message));
+
+    UI.showLoading("projects-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.PROJECTS)
+      .then(rows => UI.renderCards("projects-container", rows.slice(0, 4), { emptyMessage: "No project updates." }))
+      .catch(e  => UI.showError("projects-container", "Could not load projects. " + e.message));
+  </script>
+</body>
+</html>

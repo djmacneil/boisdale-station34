@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notices</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="page-wrap">
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Northside Volunteer Fire Department</div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="notices.html" class="active">Notices</a>
+        <a href="events.html">Events</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="projects.html">Projects</a>
+        <a href="minutes.html">Minutes</a>
+        <a href="community.html">Community</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <h1 class="page-title">Notices &amp; Announcements</h1>
+      <p style="color:#666;margin-bottom:1.5rem;font-size:.95rem;">
+        Only notices active today are shown. Expired notices are hidden automatically.
+      </p>
+      <div id="notices-container" class="card-grid"></div>
+    </div>
+  </main>
+  <footer id="site-footer">
+    <div class="container">
+      Northside Volunteer Fire Department &nbsp;·&nbsp;
+      123 Station Road, Northside, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:info@northsidevfd.ca">info@northsidevfd.ca</a>
+    </div>
+  </footer>
+  <script src="../js/config.js"></script>
+  <script src="../js/google-api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.title = "Notices — " + CONFIG.SITE.HALL_SHORT;
+    UI.showLoading("notices-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES)
+      .then(rows => UI.renderCards("notices-container", rows, { emptyMessage: "No active notices at this time." }))
+      .catch(e  => UI.showError("notices-container", e.message));
+  </script>
+</body>
+</html>
