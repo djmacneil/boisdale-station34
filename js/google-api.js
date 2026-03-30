@@ -141,12 +141,11 @@ const GoogleAPI = (() => {
    * Expects columns named "key" and "value".
    */
   async function fetchConfig(sheetName = "Config") {
-    console.log("fetchConfig called, fetching sheet:", sheetName);
     const rows = await fetchSheet(sheetName);
-    console.log("fetchConfig raw rows:", rows);
     const cfg = {};
     rows.forEach(row => {
-      if (row.key) cfg[row.key.trim()] = (row.value || "").trim();
+      const cols = Object.values(row);
+      if (cols[0]) cfg[cols[0].trim()] = (cols[1] || "").trim();
     });
     return cfg;
   }
