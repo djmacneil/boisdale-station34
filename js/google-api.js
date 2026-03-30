@@ -141,6 +141,7 @@ const GoogleAPI = (() => {
    * Expects columns named "key" and "value".
    */
   async function fetchConfig(sheetName = "Config") {
+    console.log("fetchConfig called, fetching sheet:", sheetName);
     const rows = await fetchSheet(sheetName);
     console.log("fetchConfig raw rows:", rows);
     const cfg = {};
