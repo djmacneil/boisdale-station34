@@ -25,10 +25,8 @@
 
 const CONFIG = {
   GOOGLE_API_KEY: GOOGLE_API_KEY,
-  SPREADSHEET_ID: "1jlcWZnge9bEFGr0GIK2FfgYfcXLS5WtNkZXNKINYryw",
-
   // The main content spreadsheet
-  SPREADSHEET_ID: "YOUR_SPREADSHEET_ID_HERE",
+  SPREADSHEET_ID: "1jlcWZnge9bEFGr0GIK2FfgYfcXLS5WtNkZXNKINYryw",
 
   // Sheet tab names inside the spreadsheet
   SHEETS: {
@@ -51,11 +49,11 @@ const CONFIG = {
 
   // Site branding
   SITE: {
-    HALL_NAME:  "Northside Volunteer Fire Department",
-    HALL_SHORT: "Northside VFD",
-    ADDRESS:    "123 Station Road, Northside, NS",
+    HALL_NAME:  "Boisdale Station 34",
+    HALL_SHORT: "Boisdale VFD",
+    ADDRESS:    "3810 Grand Narrows Highway, Boisdale, Nova Scotia",
     PHONE:      "(902) 555-0100",
-    EMAIL:      "info@northsidevfd.ca",
+    EMAIL:      "boisdalevfd@gmail.com",
     // Colors (CSS hex)
     COLOR_PRIMARY: "#c0392b",   // fire red
     COLOR_DARK:    "#1a1a1a",
