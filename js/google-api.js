@@ -142,6 +142,7 @@ const GoogleAPI = (() => {
    */
   async function fetchConfig(sheetName = "Config") {
     const rows = await fetchSheet(sheetName);
+    console.log("fetchConfig raw rows:", rows);
     const cfg = {};
     rows.forEach(row => {
       if (row.key) cfg[row.key.trim()] = (row.value || "").trim();

@@ -152,6 +152,7 @@ const UI = (() => {
    * Apply values from the Config sheet to the page header and footer.
    */
   function applyConfig(cfg) {
+    console.log("applyConfig received:", cfg);
     const phone = document.getElementById("footer-phone");
     const email = document.getElementById("footer-email");
     if (phone && cfg.Phone) {

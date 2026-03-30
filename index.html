@@ -117,7 +117,7 @@
       .catch(e  => UI.showError("projects-container", "Could not load projects. " + e.message));
 
     lucide.createIcons();
-    GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(() => {});
+    GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(e => console.error("fetchConfig error:", e));
   </script>
 </body>
 </html>
