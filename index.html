@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Home — Boisdale VFD</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body class="page-wrap">
 
@@ -38,7 +39,7 @@
   <main>
     <div class="container">
 
-      <h2 class="page-title"><a href="pages/calendar.html">Upcoming Events</a></h2>
+      <h2 class="page-title"><i data-lucide="calendar-days" class="section-icon"></i><a href="pages/calendar.html">Upcoming Events</a></h2>
       <div id="events-container"></div>
       <p style="margin-top:1rem;font-family:var(--font-ui);font-size:.9rem;">
         <a href="pages/calendar.html">View full calendar →</a>
@@ -46,7 +47,7 @@
 
       <br>
 
-      <h2 class="page-title">Fire Department Notices</h2>
+      <h2 class="page-title"><i data-lucide="siren" class="section-icon"></i>Fire Department Notices</h2>
       <div id="meetings-container" class="card-grid"></div>
       <p style="margin-top:1rem;font-family:var(--font-ui);font-size:.9rem;">
         <a href="pages/minutes.html">View meeting minutes →</a>
@@ -54,12 +55,12 @@
 
       <br>
 
-      <h2 class="page-title"><a href="pages/community.html">Community Notices</a></h2>
+      <h2 class="page-title"><i data-lucide="megaphone" class="section-icon"></i><a href="pages/community.html">Community Notices</a></h2>
       <div id="community-container" class="card-grid"></div>
 
       <br>
 
-      <h2 class="page-title"><a href="pages/projects.html">Project Updates</a></h2>
+      <h2 class="page-title"><i data-lucide="wrench" class="section-icon"></i><a href="pages/projects.html">Project Updates</a></h2>
       <div id="projects-container" class="card-grid"></div>
       <p style="margin-top:1rem;font-family:var(--font-ui);font-size:.9rem;">
         <a href="pages/projects.html">View all projects →</a>
@@ -110,6 +111,8 @@
     GoogleAPI.fetchFiltered(CONFIG.SHEETS.PROJECTS)
       .then(rows => UI.renderCards("projects-container", rows.slice(0, 4), { emptyMessage: "No project updates." }))
       .catch(e  => UI.showError("projects-container", "Could not load projects. " + e.message));
+
+    lucide.createIcons();
   </script>
 </body>
 </html>
