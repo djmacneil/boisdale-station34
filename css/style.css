@@ -227,6 +227,41 @@ nav a:hover, nav a.active {
   margin-bottom: .55rem;
 }
 
+/* ── Events table ─────────────────────────────────────────────── */
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: .92rem;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.events-table th {
+  text-align: left;
+  padding: .65rem .85rem;
+  background: var(--primary);
+  color: #fff;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.events-table td {
+  padding: .65rem .85rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.events-table tr:last-child td { border-bottom: none; }
+.events-table tr:nth-child(even) td { background: #f5f5f5; }
+
+.ev-date { white-space: nowrap; font-weight: 600; color: var(--dark); }
+.ev-time { white-space: nowrap; color: var(--mid); }
+.ev-title { color: var(--dark); }
+
 /* ── File list ────────────────────────────────────────────────── */
 .file-list { list-style: none; }
 

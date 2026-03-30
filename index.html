@@ -39,7 +39,7 @@
     <div class="container">
 
       <h2 class="page-title"><a href="pages/events.html">Upcoming Events</a></h2>
-      <div id="events-container" class="card-grid"></div>
+      <div id="events-container"></div>
       <p style="margin-top:1rem;font-family:var(--font-ui);font-size:.9rem;">
         <a href="pages/calendar.html">View full calendar →</a>
       </p>
@@ -86,41 +86,8 @@
       .catch(e => console.warn("Could not load notices:", e.message));
 
     UI.showLoading("events-container");
-    GoogleAPI.fetchSheet(CONFIG.SHEETS.EVENTS)
-      .then(rows => {
-        console.log("=== EVENTS DEBUG ===");
-        console.log("Total rows from sheet:", rows.length);
-        console.log("Raw rows:", JSON.stringify(rows, null, 2));
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        console.log("Today (midnight):", today.toISOString());
-
-        rows.forEach((r, i) => {
-          const raw = r.start_date;
-          const parsed = new Date(r.start_date);
-          console.log(`Row ${i}: title="${r.title}" start_date="${raw}" parsed=${parsed} isValid=${!isNaN(parsed)} >= today: ${parsed >= today}`);
-        });
-
-        const upcoming = rows
-          .filter(r => {
-            if (!r.start_date) return false;
-            const [y, m, d] = r.start_date.split("-").map(Number);
-            return new Date(y, m - 1, d) >= today;
-          })
-          .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-          .slice(0, 5);
-        console.log("After filter, upcoming count:", upcoming.length);
-
-        console.log("Upcoming rows to render:", JSON.stringify(upcoming, null, 2));
-        try {
-          UI.renderCards("events-container", upcoming, { emptyMessage: "No upcoming events." });
-          console.log("renderCards completed OK");
-        } catch(err) {
-          console.error("renderCards threw an error:", err);
-          UI.showError("events-container", "Render error: " + err.message);
-        }
-      })
+    GoogleAPI.fetchCalendarEvents(CONFIG.CALENDAR_ID)
+      .then(events => UI.renderEventsTable("events-container", events))
       .catch(e => UI.showError("events-container", "Could not load events. " + e.message));
 
     UI.showLoading("meetings-container");

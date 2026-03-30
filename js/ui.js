@@ -70,6 +70,39 @@ const UI = (() => {
     `).join("") + `</ul>`;
   }
 
+  // ─── Events table ─────────────────────────────────────────────────────────
+
+  /**
+   * Render Calendar API events as a table showing date, time, and title.
+   */
+  function renderEventsTable(containerId, events) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    if (!events.length) { showEmpty(containerId, "No upcoming events."); return; }
+
+    const rows = events.map(ev => {
+      const isAllDay = !!ev.start.date;
+      const startDt  = isAllDay ? new Date(ev.start.date + "T00:00:00") : new Date(ev.start.dateTime);
+      const endDt    = isAllDay ? null : new Date(ev.end.dateTime);
+      const dateStr  = startDt.toLocaleDateString("en-CA", { weekday: "short", year: "numeric", month: "long", day: "numeric" });
+      const timeStr  = isAllDay ? "All day" : `${_fmtTime(startDt)} – ${_fmtTime(endDt)}`;
+      return `<tr>
+        <td class="ev-date">${dateStr}</td>
+        <td class="ev-time">${timeStr}</td>
+        <td class="ev-title">${escHtml(ev.summary || "Untitled")}</td>
+      </tr>`;
+    }).join("");
+
+    el.innerHTML = `<table class="events-table">
+      <thead><tr><th>Date</th><th>Time</th><th>Event</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  function _fmtTime(dt) {
+    return dt.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", hour12: true });
+  }
+
   // ─── Google Calendar embed ────────────────────────────────────────────────
 
   /**
@@ -104,5 +137,5 @@ const UI = (() => {
     return d.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
   }
 
-  return { showLoading, showError, showEmpty, renderCards, renderFileList, renderCalendar, escHtml, formatDate };
+  return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, escHtml, formatDate };
 })();

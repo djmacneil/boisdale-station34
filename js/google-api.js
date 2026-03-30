@@ -114,5 +114,26 @@ const GoogleAPI = (() => {
     return `${(n / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  return { fetchSheet, fetchFiltered, fetchUpcoming, filterByDate, filterUpcoming, listDriveFolder, mimeIcon, formatSize };
+  // ─── Calendar ─────────────────────────────────────────────────────────────
+
+  /**
+   * Fetch upcoming events from Google Calendar for the next N months.
+   * Returns the raw event items array from the Calendar API.
+   */
+  async function fetchCalendarEvents(calendarId, months = 2) {
+    const now   = new Date();
+    const later = new Date();
+    later.setMonth(later.getMonth() + months);
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`
+      + `?key=${CONFIG.GOOGLE_API_KEY}`
+      + `&timeMin=${encodeURIComponent(now.toISOString())}`
+      + `&timeMax=${encodeURIComponent(later.toISOString())}`
+      + `&singleEvents=true&orderBy=startTime&maxResults=50`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Calendar fetch failed: ${res.status}`);
+    const data = await res.json();
+    return data.items || [];
+  }
+
+  return { fetchSheet, fetchFiltered, fetchUpcoming, filterByDate, filterUpcoming, listDriveFolder, mimeIcon, formatSize, fetchCalendarEvents };
 })();
