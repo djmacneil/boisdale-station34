@@ -146,5 +146,33 @@ const UI = (() => {
     return d.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
   }
 
-  return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, escHtml, formatDate };
+  // ─── Dynamic config ───────────────────────────────────────────────────────
+
+  /**
+   * Apply values from the Config sheet to the page header and footer.
+   */
+  function applyConfig(cfg) {
+    const phone = document.getElementById("footer-phone");
+    const email = document.getElementById("footer-email");
+    if (phone && cfg.Phone) {
+      phone.href = "tel:" + cfg.Phone.replace(/\D/g, "");
+      phone.textContent = cfg.Phone;
+    }
+    if (email && cfg.Email) {
+      email.href = "mailto:" + cfg.Email;
+      email.textContent = cfg.Email;
+    }
+    const leftImg  = document.getElementById("header-left-img");
+    const rightImg = document.getElementById("header-right-img");
+    if (leftImg && cfg.Header_Left_Image) {
+      leftImg.src = cfg.Header_Left_Image;
+      leftImg.style.display = "block";
+    }
+    if (rightImg && cfg.Header_Right_Image) {
+      rightImg.src = cfg.Header_Right_Image;
+      rightImg.style.display = "block";
+    }
+  }
+
+  return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, applyConfig, escHtml, formatDate };
 })();

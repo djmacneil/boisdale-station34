@@ -24,7 +24,11 @@
 <body class="page-wrap">
   <header id="site-header">
     <div class="header-inner">
-      <div class="site-title">🔥 Boisdale Station 34</div>
+      <div class="site-branding">
+        <img id="header-left-img" class="header-img" style="display:none" alt="">
+        <div class="site-title">🔥 Boisdale Station 34</div>
+        <img id="header-right-img" class="header-img" style="display:none" alt="">
+      </div>
       <nav>
         <a href="../index.html">Home</a>
         <a href="notices.html">Notices</a>
@@ -52,8 +56,8 @@
     <div class="container">
       Boisdale Station 34 &nbsp;·&nbsp;
       3810 Grand Narrows Highway, Boisdale, Nova Scotia &nbsp;·&nbsp;
-      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
-      <a href="mailto:boisdalevfd@gmail.com">boisdalevfd@gmail.com</a>
+      <a href="tel:9025550100" id="footer-phone">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:boisdalevfd@gmail.com" id="footer-email">boisdalevfd@gmail.com</a>
     </div>
   </footer>
   <script src="../js/config.js"></script>
@@ -97,6 +101,7 @@
       const filtered = cat === "all" ? allEvents : allEvents.filter(r => r.category === cat);
       UI.renderCards("events-container", filtered, { emptyMessage: "No events found." });
     }
+    GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(() => {});
   </script>
 </body>
 </html>

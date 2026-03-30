@@ -134,5 +134,20 @@ const GoogleAPI = (() => {
     return data.items || [];
   }
 
-  return { fetchSheet, fetchFiltered, fetchUpcoming, filterByDate, filterUpcoming, listDriveFolder, mimeIcon, formatSize, fetchCalendarEvents };
+  // ─── Config sheet ─────────────────────────────────────────────────────────
+
+  /**
+   * Fetch the Config sheet and return a plain key→value object.
+   * Expects columns named "key" and "value".
+   */
+  async function fetchConfig(sheetName = "Config") {
+    const rows = await fetchSheet(sheetName);
+    const cfg = {};
+    rows.forEach(row => {
+      if (row.key) cfg[row.key.trim()] = (row.value || "").trim();
+    });
+    return cfg;
+  }
+
+  return { fetchSheet, fetchFiltered, fetchUpcoming, filterByDate, filterUpcoming, listDriveFolder, mimeIcon, formatSize, fetchCalendarEvents, fetchConfig };
 })();
