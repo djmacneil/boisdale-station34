@@ -99,19 +99,19 @@ nav a:hover, nav a.active {
 .notices-ticker {
   background: #b7400a;
   color: #fff;
-  font-family: var(--font-ui);
-  font-size: .88rem;
+  font-family: monospace;
+  font-size: 1.76rem;
   display: none;
   align-items: stretch;
   overflow: hidden;
-  line-height: 2.5rem;
+  line-height: 4rem;
 }
 
 .ticker-label {
   background: rgba(0,0,0,.28);
   padding: 0 1.1rem;
   font-weight: 700;
-  font-size: .75rem;
+  font-size: 1.5rem;
   text-transform: uppercase;
   letter-spacing: .1em;
   flex-shrink: 0;
