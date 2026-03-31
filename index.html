@@ -32,10 +32,6 @@
     </div>
   </div>
 
-  <div class="slideshow" id="photo-slideshow">
-    <img id="slideshow-img" src="" alt="">
-  </div>
-
   <div class="notices-ticker" id="notices-ticker">
     <div class="ticker-label">⚠ Notice</div>
     <div class="ticker-wrap">
@@ -78,6 +74,11 @@
 
     </div>
   </main>
+
+  <div class="slideshow" id="photo-slideshow">
+    <img id="slideshow-img-a" src="" alt="">
+    <img id="slideshow-img-b" src="" alt="">
+  </div>
 
   <footer id="site-footer">
     <div class="container">
@@ -127,18 +128,22 @@
         const photos = files.filter(f => f.mimeType.startsWith("image/"));
         if (!photos.length) return;
         const wrap = document.getElementById("photo-slideshow");
-        const img  = document.getElementById("slideshow-img");
+        const imgA = document.getElementById("slideshow-img-a");
+        const imgB = document.getElementById("slideshow-img-b");
         let i = 0;
         function show(index) {
-          img.style.opacity = 0;
+          imgA.style.opacity = 0;
+          imgB.style.opacity = 0;
           setTimeout(() => {
-            img.src = `https://drive.google.com/thumbnail?id=${photos[index].id}&sz=w1200`;
-            img.style.opacity = 1;
+            imgA.src = `https://drive.google.com/thumbnail?id=${photos[index % photos.length].id}&sz=w1200`;
+            imgB.src = `https://drive.google.com/thumbnail?id=${photos[(index + 1) % photos.length].id}&sz=w1200`;
+            imgA.style.opacity = 1;
+            imgB.style.opacity = 1;
           }, 600);
         }
-        wrap.style.display = "block";
+        wrap.style.display = "flex";
         show(0);
-        setInterval(() => { i = (i + 1) % photos.length; show(i); }, 4000);
+        setInterval(() => { i = (i + 2) % photos.length; show(i); }, 4000);
       })
       .catch(() => {});
 
