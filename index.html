@@ -149,6 +149,30 @@
 
     lucide.createIcons();
     GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(e => console.error("fetchConfig error:", e));
+
+    GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.HEADER_IMAGES)
+      .then(files => {
+        const hero = document.querySelector(".hero");
+        if (!hero) return;
+        const heroText = hero.querySelector(".hero-text");
+        const left  = files.find(f => f.name === "Header_Left_Image");
+        const right = files.find(f => f.name === "Header_Right_Image");
+        if (left) {
+          const img = document.createElement("img");
+          img.src = `https://drive.google.com/thumbnail?id=${left.id}&sz=w300`;
+          img.className = "hero-img";
+          img.alt = "";
+          hero.insertBefore(img, heroText);
+        }
+        if (right) {
+          const img = document.createElement("img");
+          img.src = `https://drive.google.com/thumbnail?id=${right.id}&sz=w300`;
+          img.className = "hero-img";
+          img.alt = "";
+          hero.appendChild(img);
+        }
+      })
+      .catch(() => {});
   </script>
 </body>
 </html>

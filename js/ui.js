@@ -162,31 +162,6 @@ const UI = (() => {
       email.href = "mailto:" + cfg.Email;
       email.textContent = cfg.Email;
     }
-    const hero = document.querySelector(".hero");
-    if (hero) {
-      const heroText = hero.querySelector(".hero-text");
-      if (cfg.Header_Left_Image) {
-        const img = document.createElement("img");
-        img.src = _driveImgUrl(cfg.Header_Left_Image);
-        img.className = "hero-img";
-        img.alt = "";
-        hero.insertBefore(img, heroText);
-      }
-      if (cfg.Header_Right_Image) {
-        const img = document.createElement("img");
-        img.src = _driveImgUrl(cfg.Header_Right_Image);
-        img.className = "hero-img";
-        img.alt = "";
-        hero.appendChild(img);
-      }
-    }
-  }
-
-  // Convert any Google Drive sharing/view URL to the embeddable thumbnail URL
-  function _driveImgUrl(url) {
-    const match = url.match(/(?:[?&]id=|\/d\/)([a-zA-Z0-9_-]+)/);
-    if (match) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w300`;
-    return url;
   }
 
   return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, applyConfig, escHtml, formatDate };
