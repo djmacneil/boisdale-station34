@@ -12,7 +12,7 @@ const Layout = (() => {
     { href: "/pages/events.html",     label: "Events" },
     { href: "/pages/calendar.html",   label: "Calendar" },
     { href: "/pages/projects.html",   label: "Projects" },
-    { href: "/pages/minutes.html",    label: "Minutes" },
+    { href: "/pages/firedept.html",    label: "Minutes" },
     { href: "/pages/community.html",  label: "Community" },
   ];
 
