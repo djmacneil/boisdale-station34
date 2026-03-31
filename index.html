@@ -130,20 +130,27 @@
         const wrap = document.getElementById("photo-slideshow");
         const imgA = document.getElementById("slideshow-img-a");
         const imgB = document.getElementById("slideshow-img-b");
-        let i = 0;
-        function show(index) {
-          imgA.style.opacity = 0;
-          imgB.style.opacity = 0;
-          setTimeout(() => {
-            imgA.src = `https://drive.google.com/thumbnail?id=${photos[index % photos.length].id}&sz=w1200`;
-            imgB.src = `https://drive.google.com/thumbnail?id=${photos[(index + 1) % photos.length].id}&sz=w1200`;
-            imgA.style.opacity = 1;
-            imgB.style.opacity = 1;
-          }, 600);
+        const photoUrl = id => `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
+        function fadeSwap(imgEl, src) {
+          imgEl.style.opacity = 0;
+          setTimeout(() => { imgEl.src = src; imgEl.style.opacity = 1; }, 600);
         }
+        let li = 0, ri = 1 % photos.length;
+        imgA.src = photoUrl(photos[li].id);
+        imgB.src = photoUrl(photos[ri].id);
+        imgA.style.opacity = 1;
+        imgB.style.opacity = 1;
         wrap.style.display = "flex";
-        show(0);
-        setInterval(() => { i = (i + 2) % photos.length; show(i); }, 4000);
+        setInterval(() => {
+          li = (li + 2) % photos.length;
+          fadeSwap(imgA, photoUrl(photos[li].id));
+        }, 4000);
+        setTimeout(() => {
+          setInterval(() => {
+            ri = (ri + 2) % photos.length;
+            fadeSwap(imgB, photoUrl(photos[ri].id));
+          }, 4000);
+        }, 2000);
       })
       .catch(() => {});
 
