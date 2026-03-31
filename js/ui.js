@@ -162,15 +162,23 @@ const UI = (() => {
       email.href = "mailto:" + cfg.Email;
       email.textContent = cfg.Email;
     }
-    const leftImg  = document.getElementById("header-left-img");
-    const rightImg = document.getElementById("header-right-img");
-    if (leftImg && cfg.Header_Left_Image) {
-      leftImg.src = _driveImgUrl(cfg.Header_Left_Image);
-      leftImg.style.display = "block";
-    }
-    if (rightImg && cfg.Header_Right_Image) {
-      rightImg.src = _driveImgUrl(cfg.Header_Right_Image);
-      rightImg.style.display = "block";
+    const hero = document.querySelector(".hero");
+    if (hero) {
+      const heroText = hero.querySelector(".hero-text");
+      if (cfg.Header_Left_Image) {
+        const img = document.createElement("img");
+        img.src = _driveImgUrl(cfg.Header_Left_Image);
+        img.className = "hero-img";
+        img.alt = "";
+        hero.insertBefore(img, heroText);
+      }
+      if (cfg.Header_Right_Image) {
+        const img = document.createElement("img");
+        img.src = _driveImgUrl(cfg.Header_Right_Image);
+        img.className = "hero-img";
+        img.alt = "";
+        hero.appendChild(img);
+      }
     }
   }
 
