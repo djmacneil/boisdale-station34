@@ -165,13 +165,20 @@ const UI = (() => {
     const leftImg  = document.getElementById("header-left-img");
     const rightImg = document.getElementById("header-right-img");
     if (leftImg && cfg.Header_Left_Image) {
-      leftImg.src = cfg.Header_Left_Image;
+      leftImg.src = _driveImgUrl(cfg.Header_Left_Image);
       leftImg.style.display = "block";
     }
     if (rightImg && cfg.Header_Right_Image) {
-      rightImg.src = cfg.Header_Right_Image;
+      rightImg.src = _driveImgUrl(cfg.Header_Right_Image);
       rightImg.style.display = "block";
     }
+  }
+
+  // Convert any Google Drive sharing/view URL to the embeddable thumbnail URL
+  function _driveImgUrl(url) {
+    const match = url.match(/(?:[?&]id=|\/d\/)([a-zA-Z0-9_-]+)/);
+    if (match) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w300`;
+    return url;
   }
 
   return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, applyConfig, escHtml, formatDate };
