@@ -90,7 +90,7 @@ const UI = (() => {
       const dateKey  = startDt.toLocaleDateString("en-CA", { weekday: "short", year: "numeric", month: "long", day: "numeric" });
       const timeStr  = isAllDay ? "All day" : `${_fmtTime(startDt)} – ${_fmtTime(endDt)}`;
       if (!groups[dateKey]) { groups[dateKey] = []; dateKeys.push(dateKey); }
-      groups[dateKey].push({ timeStr, title: ev.summary || "Untitled" });
+      groups[dateKey].push({ timeStr, title: ev.summary || "Untitled", notes: ev.description || "" });
     });
 
     const rows = dateKeys.map(date => {
@@ -99,11 +99,12 @@ const UI = (() => {
         ${i === 0 ? `<td class="ev-date" rowspan="${eventsForDay.length}">${date}</td>` : ""}
         <td class="ev-time">${ev.timeStr}</td>
         <td class="ev-title">${escHtml(ev.title)}</td>
+        <td class="ev-notes">${ev.notes ? formatBody(ev.notes) : ""}</td>
       </tr>`).join("");
     }).join("");
 
     el.innerHTML = `<table class="events-table">
-      <thead><tr><th>Date</th><th>Time</th><th>Event</th></tr></thead>
+      <thead><tr><th>Date</th><th>Time</th><th>Event</th><th>Notes</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   }

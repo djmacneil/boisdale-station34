@@ -349,6 +349,7 @@ nav a:hover, nav a.active {
 .ev-date { white-space: nowrap; font-weight: 600; color: var(--dark); }
 .ev-time { white-space: nowrap; color: var(--mid); }
 .ev-title { color: var(--dark); }
+.ev-notes { color: var(--mid); font-size: .85rem; }
 
 /* ── File list ────────────────────────────────────────────────── */
 .file-list { list-style: none; }
