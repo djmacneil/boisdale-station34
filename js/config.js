@@ -50,7 +50,7 @@ const CONFIG = {
 
   // Site branding
   SITE: {
-    HALL_NAME:  "Boisdale Station 34",
+    HALL_NAME:  "Boisdale Fire Station 34",
     HALL_SHORT: "Boisdale VFD",
     ADDRESS:    "3810 Grand Narrows Highway, Boisdale, Nova Scotia",
     PHONE:      "(902) 555-0100",
