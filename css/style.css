@@ -29,6 +29,18 @@ body {
   line-height: 1.7;
   color: var(--dark);
   background: var(--light);
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('../pages/CameronTartan.png');
+  background-repeat: repeat;
+  background-size: auto;
+  opacity: 0.07;
+  z-index: -1;
+  pointer-events: none;
 }
 
 a { color: var(--primary); text-decoration: none; }
