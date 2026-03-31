@@ -154,14 +154,24 @@ nav a:hover, nav a.active {
 
 /* ── Hero banner (home page) ──────────────────────────────────── */
 .hero {
-  background: var(--primary);
+  background-image: url('../pages/CameronTartan.png');
+  background-size: cover;
+  background-position: center;
   color: var(--white);
   padding: 2rem 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
+  position: relative;
 }
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+.hero > * { position: relative; }
 .hero-text { text-align: center; }
 .hero h1 {
   font-family: var(--font-ui);
