@@ -152,6 +152,7 @@
 
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.HEADER_IMAGES)
       .then(files => {
+        console.log("Header images folder files:", files.map(f => f.name));
         const hero = document.querySelector(".hero");
         if (!hero) return;
         const heroText = hero.querySelector(".hero-text");
