@@ -152,14 +152,11 @@
 
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.HEADER_IMAGES)
       .then(files => {
-        console.log("Header images folder files:", files.map(f => f.name));
         const hero = document.querySelector(".hero");
         if (!hero) return;
         const heroText = hero.querySelector(".hero-text");
         const left  = files.find(f => f.name.replace(/\.[^.]+$/, "") === "Header_Left_Image");
         const right = files.find(f => f.name.replace(/\.[^.]+$/, "") === "Header_Right_Image");
-        console.log("Left match:", left ? left.name : "NOT FOUND");
-        console.log("Right match:", right ? right.name : "NOT FOUND");
         if (left) {
           const img = document.createElement("img");
           img.src = `https://drive.google.com/thumbnail?id=${left.id}&sz=w300`;
@@ -175,7 +172,7 @@
           hero.appendChild(img);
         }
       })
-      .catch(e => console.error("Header images error:", e.message));
+      .catch(() => {});
   </script>
 </body>
 </html>
