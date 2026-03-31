@@ -155,8 +155,8 @@
         const hero = document.querySelector(".hero");
         if (!hero) return;
         const heroText = hero.querySelector(".hero-text");
-        const left  = files.find(f => f.name === "Header_Left_Image");
-        const right = files.find(f => f.name === "Header_Right_Image");
+        const left  = files.find(f => f.name.replace(/\.[^.]+$/, "") === "Header_Left_Image");
+        const right = files.find(f => f.name.replace(/\.[^.]+$/, "") === "Header_Right_Image");
         if (left) {
           const img = document.createElement("img");
           img.src = `https://drive.google.com/thumbnail?id=${left.id}&sz=w300`;
