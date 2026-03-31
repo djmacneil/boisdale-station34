@@ -24,11 +24,11 @@
   </header>
   <main>
     <div class="container">
-      <h1 class="page-title">Meeting Minutes</h1>
-      <p style="color:#666;margin-bottom:1.5rem;font-size:.95rem;">
-        Minutes are uploaded to a shared Google Drive folder after each meeting.
-        Click any document to open it in Google Docs or download as PDF.
-      </p>
+      <h1 class="page-title">Fire Department</h1>
+
+      <div id="firedept-container" class="card-grid"></div>
+
+      <br>
 
       <div class="section-panel">
         <h2>📄 Minutes Archive</h2>
@@ -48,7 +48,13 @@
   <script src="../js/google-api.js"></script>
   <script src="../js/ui.js"></script>
   <script>
-    document.title = "Minutes — " + CONFIG.SITE.HALL_SHORT;
+    document.title = "Fire Department — " + CONFIG.SITE.HALL_SHORT;
+
+    UI.showLoading("firedept-container");
+    GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
+      .then(rows => UI.renderCards("firedept-container", rows, { emptyMessage: "No fire department notices at this time." }))
+      .catch(e  => UI.showError("firedept-container", e.message));
+
     UI.showLoading("minutes-container");
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.MINUTES)
       .then(files => UI.renderFileList("minutes-container", files))
