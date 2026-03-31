@@ -41,6 +41,7 @@ const CONFIG = {
     MINUTES:  "1UpvbAHhwL-PiGX7Wy-3xl4NLUxY2DDOM",
     PROJECTS: "1nII7pqZ-2EDtFu-Yk4C6ks58A-r3SBwT",
     GENERAL:  "1_z8XoK31ziDt-ekBPRKyLj0LHaBwtn3e",
+    PHOTOS:   "1Tp_KouXrCjeLSFq-40dtwxvNtzvKMres",
   },
 
   // Google Calendar ID

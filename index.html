@@ -32,6 +32,10 @@
     </div>
   </div>
 
+  <div class="slideshow" id="photo-slideshow">
+    <img id="slideshow-img" src="" alt="">
+  </div>
+
   <div class="notices-ticker" id="notices-ticker">
     <div class="ticker-label">⚠ Notice</div>
     <div class="ticker-wrap">
@@ -117,6 +121,26 @@
     GoogleAPI.fetchFiltered(CONFIG.SHEETS.PROJECTS)
       .then(rows => UI.renderCards("projects-container", rows.slice(0, 4), { emptyMessage: "No project updates." }))
       .catch(e  => UI.showError("projects-container", "Could not load projects. " + e.message));
+
+    GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.PHOTOS)
+      .then(files => {
+        const photos = files.filter(f => f.mimeType.startsWith("image/"));
+        if (!photos.length) return;
+        const wrap = document.getElementById("photo-slideshow");
+        const img  = document.getElementById("slideshow-img");
+        let i = 0;
+        function show(index) {
+          img.style.opacity = 0;
+          setTimeout(() => {
+            img.src = `https://drive.google.com/thumbnail?id=${photos[index].id}&sz=w1200`;
+            img.style.opacity = 1;
+          }, 600);
+        }
+        wrap.style.display = "block";
+        show(0);
+        setInterval(() => { i = (i + 1) % photos.length; show(i); }, 4000);
+      })
+      .catch(() => {});
 
     lucide.createIcons();
     GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(e => console.error("fetchConfig error:", e));
