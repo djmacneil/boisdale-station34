@@ -209,7 +209,7 @@
         sheet === "Events" ? "block" : "none";
     }
 
-    function submitPost() {
+    async function submitPost() {
       const btn   = document.getElementById("submit-btn");
       const title = document.getElementById("f-title").value.trim();
       const token = document.getElementById("f-token").value.trim();
@@ -235,31 +235,24 @@
         }
       };
 
-      // Use XHR instead of fetch — avoids Safari redirect issue with Apps Script
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", CONFIG.FORMS_ENDPOINT);
-      xhr.setRequestHeader("Content-Type", "text/plain");
-      xhr.onload = function() {
-        try {
-          const json = JSON.parse(xhr.responseText);
-          if (json.success) {
-            showStatus("success", "Posted successfully. It will appear on the site within seconds.");
-            clearForm();
-          } else {
-            showStatus("error", "Error: " + (json.error || "Unknown error"));
-          }
-        } catch(e) {
-          showStatus("error", "Unexpected response from server.");
-        }
-        btn.disabled = false;
-        btn.textContent = "Post to site";
-      };
-      xhr.onerror = function() {
+      // mode: no-cors bypasses CORS response-reading restrictions with Apps Script
+      fetch(CONFIG.FORMS_ENDPOINT, {
+        method:  "POST",
+        mode:    "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body:    JSON.stringify(payload),
+      })
+      .then(() => {
+        showStatus("success", "Posted successfully. It will appear on the site within seconds.");
+        clearForm();
+      })
+      .catch(() => {
         showStatus("error", "Could not reach the server. Check your connection.");
+      })
+      .finally(() => {
         btn.disabled = false;
         btn.textContent = "Post to site";
-      };
-      xhr.send(JSON.stringify(payload));
+      });
     }
 
     function showStatus(type, msg) {
