@@ -113,10 +113,10 @@
         <div class="form-group">
           <label for="sheet-select">Post type</label>
           <select id="sheet-select" onchange="updateForm()">
-            <option value="Fire Department">FireDept</option>
+            <option value="Events">Fire Department</option>
             <option value="Projects">Project update</option>
             <option value="Community">Community info</option>
-            <option value="Emergency Banner">Notice</option>
+            <option value="Notice">Emergency Banner</option>
           </select>
         </div>
 
@@ -144,10 +144,10 @@
           <select id="f-category">
             <option value="">— select —</option>
             <option>Meeting</option>
-            <option>Fundraiser</option>
             <option>Training</option>
             <option>Community</option>
             <option>Social</option>
+            <option>Fundraiser</option>
             <option>Other</option>
           </select>
         </div>
@@ -157,12 +157,12 @@
           <div class="form-group">
             <label for="f-start">Publish from</label>
             <input type="date" id="f-start">
-            <p class="hint">Leave blank to publish immediately</p>
+            <p class="hint">This is the date the post will begin to publish</p>
           </div>
           <div class="form-group">
             <label for="f-end">Publish until</label>
             <input type="date" id="f-end">
-            <p class="hint">Leave blank to never expire</p>
+            <p class="hint">Expiry date is required</p>
           </div>
         </div>
 
@@ -218,6 +218,7 @@
 
       if (!title) { showStatus("error", "Title is required."); return; }
       if (!token) { showStatus("error", "Access token is required."); return; }
+      if (!f-end) { showStatus("error", "Posting expiry date required."); return; }
 
       btn.disabled = true;
       btn.textContent = "Posting...";
