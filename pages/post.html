@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Post Content — Boisdale Fire Station 34</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .form-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-family: var(--font-ui);
+      font-size: .85rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+      color: var(--dark);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: .55rem .75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: .95rem;
+      background: var(--white);
+      color: var(--dark);
+    }
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .submit-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: .65rem 1.75rem;
+      border-radius: var(--radius);
+      font-family: var(--font-ui);
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .submit-btn:hover  { background: var(--primary-dk); }
+    .submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .status-msg {
+      margin-top: 1rem;
+      padding: .75rem 1rem;
+      border-radius: var(--radius);
+      font-family: var(--font-ui);
+      font-size: .9rem;
+      display: none;
+    }
+    .status-msg.success {
+      background: #edfaf1;
+      border: 1px solid #a8ddb8;
+      color: #1a6e38;
+      display: block;
+    }
+    .status-msg.error {
+      background: #fdf3f2;
+      border: 1px solid #f5c6c2;
+      color: #922b21;
+      display: block;
+    }
+    .hint {
+      font-size: .8rem;
+      color: #888;
+      margin-top: .25rem;
+    }
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body class="page-wrap">
+
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Boisdale Fire Station 34</div>
+      <nav>
+        <a href="../index.html">Back to site</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="form-wrap">
+
+        <h1 class="page-title">Post Content</h1>
+        <p style="color:#666;margin-bottom:2rem;font-size:.95rem;">
+          Use this form to add notices, events, project updates, or community
+          information. Posts appear on the site immediately after submission.
+        </p>
+
+        <!-- Section selector -->
+        <div class="form-group">
+          <label for="sheet-select">Post type</label>
+          <select id="sheet-select" onchange="updateForm()">
+            <option value="Notices">Notice</option>
+            <option value="Events">Event</option>
+            <option value="Projects">Project update</option>
+            <option value="Community">Community info</option>
+          </select>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Core fields — always shown -->
+        <div class="form-group">
+          <label for="f-title">Title *</label>
+          <input type="text" id="f-title" placeholder="e.g. Road closure on Station St" required>
+        </div>
+
+        <div class="form-group">
+          <label for="f-body">Body</label>
+          <textarea id="f-body" placeholder="Full details, links, contact info..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="f-author">Author</label>
+          <input type="text" id="f-author" placeholder="e.g. J. MacDonald">
+        </div>
+
+        <!-- Category — shown for Events only -->
+        <div class="form-group" id="group-category" style="display:none">
+          <label for="f-category">Category</label>
+          <select id="f-category">
+            <option value="">— select —</option>
+            <option>Meeting</option>
+            <option>Fundraiser</option>
+            <option>Training</option>
+            <option>Community</option>
+            <option>Social</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- Date range -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-start">Publish from</label>
+            <input type="date" id="f-start">
+            <p class="hint">Leave blank to publish immediately</p>
+          </div>
+          <div class="form-group">
+            <label for="f-end">Publish until</label>
+            <input type="date" id="f-end">
+            <p class="hint">Leave blank to never expire</p>
+          </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Access token -->
+        <div class="form-group">
+          <label for="f-token">Access token *</label>
+          <input type="password" id="f-token" placeholder="Enter the shared passphrase"
+            autocomplete="off">
+          <p class="hint">Contact the site administrator if you don't have this.</p>
+        </div>
+
+        <button class="submit-btn" id="submit-btn" onclick="submitPost()">
+          Post to site
+        </button>
+
+        <div class="status-msg" id="status-msg"></div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer">
+    <div class="container">
+      Boisdale Fire Station 34 &nbsp;·&nbsp;
+      3810 Grand Narrows Highway, Boisdale, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:boisdalevfd@gmail.com">boisdalevfd@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/config.secret.js"></script>
+  <script>
+
+    // Set today as default start date
+    document.getElementById("f-start").value = new Date()
+      .toISOString().substring(0, 10);
+
+    function updateForm() {
+      const sheet = document.getElementById("sheet-select").value;
+      document.getElementById("group-category").style.display =
+        sheet === "Events" ? "block" : "none";
+    }
+
+    async function submitPost() {
+      const btn    = document.getElementById("submit-btn");
+      const status = document.getElementById("status-msg");
+      const title  = document.getElementById("f-title").value.trim();
+      const token  = document.getElementById("f-token").value.trim();
+
+      status.className = "status-msg";
+      status.textContent = "";
+
+      if (!title) {
+        showStatus("error", "Title is required.");
+        return;
+      }
+      if (!token) {
+        showStatus("error", "Access token is required.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Posting...";
+
+      const payload = {
+        token: token,
+        sheet: document.getElementById("sheet-select").value,
+        fields: {
+          title:      title,
+          body:       document.getElementById("f-body").value.trim(),
+          author:     document.getElementById("f-author").value.trim(),
+          category:   document.getElementById("f-category").value,
+          start_date: document.getElementById("f-start").value,
+          end_date:   document.getElementById("f-end").value,
+        }
+      };
+
+      try {
+        const res = await fetch(CONFIG.FORMS_ENDPOINT, {
+          method:  "POST",
+          headers: { "Content-Type": "text/plain" }, // Apps Script requires text/plain
+          body:    JSON.stringify(payload),
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          showStatus("success", "Posted successfully. It will appear on the site within seconds.");
+          clearForm();
+        } else {
+          showStatus("error", "Error: " + (json.error || "Unknown error"));
+        }
+      } catch(err) {
+        showStatus("error", "Could not reach the server. Check your connection. (" + err.message + ")");
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Post to site";
+    }
+
+    function showStatus(type, msg) {
+      const el = document.getElementById("status-msg");
+      el.className = "status-msg " + type;
+      el.textContent = msg;
+    }
+
+    function clearForm() {
+      document.getElementById("f-title").value    = "";
+      document.getElementById("f-body").value     = "";
+      document.getElementById("f-author").value   = "";
+      document.getElementById("f-category").value = "";
+      document.getElementById("f-end").value      = "";
+      document.getElementById("f-token").value    = "";
+      document.getElementById("f-start").value    = new Date()
+        .toISOString().substring(0, 10);
+    }
+
+  </script>
+</body>
+</html>
