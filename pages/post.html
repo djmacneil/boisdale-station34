@@ -209,23 +209,15 @@
         sheet === "Events" ? "block" : "none";
     }
 
-    async function submitPost() {
-      const btn    = document.getElementById("submit-btn");
-      const status = document.getElementById("status-msg");
-      const title  = document.getElementById("f-title").value.trim();
-      const token  = document.getElementById("f-token").value.trim();
+    function submitPost() {
+      const btn   = document.getElementById("submit-btn");
+      const title = document.getElementById("f-title").value.trim();
+      const token = document.getElementById("f-token").value.trim();
 
-      status.className = "status-msg";
-      status.textContent = "";
+      showStatus("", "");
 
-      if (!title) {
-        showStatus("error", "Title is required.");
-        return;
-      }
-      if (!token) {
-        showStatus("error", "Access token is required.");
-        return;
-      }
+      if (!title) { showStatus("error", "Title is required."); return; }
+      if (!token) { showStatus("error", "Access token is required."); return; }
 
       btn.disabled = true;
       btn.textContent = "Posting...";
@@ -243,26 +235,31 @@
         }
       };
 
-      try {
-        const res = await fetch(CONFIG.FORMS_ENDPOINT, {
-          method:  "POST",
-          headers: { "Content-Type": "text/plain" }, // Apps Script requires text/plain
-          body:    JSON.stringify(payload),
-        });
-        const json = await res.json();
-
-        if (json.success) {
-          showStatus("success", "Posted successfully. It will appear on the site within seconds.");
-          clearForm();
-        } else {
-          showStatus("error", "Error: " + (json.error || "Unknown error"));
+      // Use XHR instead of fetch — avoids Safari redirect issue with Apps Script
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", CONFIG.FORMS_ENDPOINT);
+      xhr.setRequestHeader("Content-Type", "text/plain");
+      xhr.onload = function() {
+        try {
+          const json = JSON.parse(xhr.responseText);
+          if (json.success) {
+            showStatus("success", "Posted successfully. It will appear on the site within seconds.");
+            clearForm();
+          } else {
+            showStatus("error", "Error: " + (json.error || "Unknown error"));
+          }
+        } catch(e) {
+          showStatus("error", "Unexpected response from server.");
         }
-      } catch(err) {
-        showStatus("error", "Could not reach the server. Check your connection. (" + err.message + ")");
-      }
-
-      btn.disabled = false;
-      btn.textContent = "Post to site";
+        btn.disabled = false;
+        btn.textContent = "Post to site";
+      };
+      xhr.onerror = function() {
+        showStatus("error", "Could not reach the server. Check your connection.");
+        btn.disabled = false;
+        btn.textContent = "Post to site";
+      };
+      xhr.send(JSON.stringify(payload));
     }
 
     function showStatus(type, msg) {
