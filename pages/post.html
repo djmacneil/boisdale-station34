@@ -234,19 +234,22 @@
         }
       };
 
-      // mode: no-cors bypasses CORS response-reading restrictions with Apps Script
       fetch(CONFIG.FORMS_ENDPOINT, {
         method:  "POST",
-        mode:    "no-cors",
         headers: { "Content-Type": "text/plain" },
         body:    JSON.stringify(payload),
       })
-      .then(() => {
-        showStatus("success", "Posted successfully. It will appear on the site within seconds.");
-        clearForm();
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) {
+          showStatus("success", "Posted successfully. It will appear on the site within seconds.");
+          clearForm();
+        } else {
+          showStatus("error", "Error: " + (json.error || "Unknown error"));
+        }
       })
-      .catch(() => {
-        showStatus("error", "Could not reach the server. Check your connection.");
+      .catch(err => {
+        showStatus("error", "Error: " + err.message);
       })
       .finally(() => {
         btn.disabled = false;
