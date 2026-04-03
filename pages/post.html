@@ -28,7 +28,7 @@
       padding: .55rem .75rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      font-family: var(--font-body);
+      font-family: var(--font-ui);
       font-size: .95rem;
       background: var(--white);
       color: var(--dark);
@@ -117,8 +117,8 @@
 
         <!-- Section selector -->
         <div class="form-group">
-          <label for="sheet-select">Post type</label>
-          <select id="sheet-select" onchange="updateForm()">
+          <label for="sheet-select">Post to Section</label>
+          <select id="sheet-select" required>
             <option value="FireDept">Fire Department</option>
             <option value="Projects">Project update</option>
             <option value="Community">Community info</option>
@@ -126,28 +126,10 @@
           </select>
         </div>
 
-        <hr class="section-divider">
-
-        <!-- Core fields — always shown -->
-        <div class="form-group">
-          <label for="f-title">Title *</label>
-          <input type="text" id="f-title" placeholder="e.g. Road closure on Station St" required>
-        </div>
-
-        <div class="form-group">
-          <label for="f-body">Body</label>
-          <textarea id="f-body" placeholder="Full details, links, contact info..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="f-author">Author</label>
-          <input type="text" id="f-author" placeholder="e.g. J. MacDonald">
-        </div>
-
         <!-- Category -->
         <div class="form-group" id="group-category">
           <label for="f-category">Category</label>
-          <select id="f-category">
+          <select id="f-category" required>
             <option value="">— select —</option>
             <option>Meeting</option>
             <option>Training</option>
@@ -160,11 +142,29 @@
           </select>
         </div>
 
+        <hr class="section-divider">
+
+        <!-- Core fields — always shown -->
+        <div class="form-group">
+          <label for="f-title">Title</label>
+          <input type="text" id="f-title" placeholder="e.g. Road closure on Station St" required>
+        </div>
+
+        <div class="form-group">
+          <label for="f-body">Body</label>
+          <textarea id="f-body" placeholder="Full details, links, contact info..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="f-author">Author</label>
+          <input type="text" id="f-author" placeholder="e.g. J. MacDonald" required>
+        </div>
+
         <!-- Date range -->
         <div class="form-row">
           <div class="form-group">
             <label for="f-start">Publish from</label>
-            <input type="date" id="f-start">
+            <input type="date" id="f-start" required>
             <p class="hint">This is the date the post will begin to publish</p>
           </div>
           <div class="form-group">
@@ -178,9 +178,9 @@
 
         <!-- Access token -->
         <div class="form-group">
-          <label for="f-token">Access token *</label>
+          <label for="f-token">Access token</label>
           <input type="password" id="f-token" placeholder="Enter the shared passphrase"
-            autocomplete="off">
+            autocomplete="off" required>
           <p class="hint">Contact the site administrator if you don't have this.</p>
         </div>
 
@@ -222,10 +222,16 @@
 
       showStatus("", "");
 
-      const endDate = document.getElementById("f-end").value;
-      if (!title)   { showStatus("error", "Title is required."); return; }
-      if (!endDate) { showStatus("error", "Publish until date is required."); return; }
-      if (!token)   { showStatus("error", "Access token is required."); return; }
+      const body     = document.getElementById("f-body").value.trim();
+      const author   = document.getElementById("f-author").value.trim();
+      const category = document.getElementById("f-category").value;
+      const endDate  = document.getElementById("f-end").value;
+      if (!title)    { showStatus("error", "Title is required."); return; }
+      if (!body)     { showStatus("error", "Body is required."); return; }
+      if (!author)   { showStatus("error", "Author is required."); return; }
+      if (!category) { showStatus("error", "Category is required."); return; }
+      if (!endDate)  { showStatus("error", "Publish until date is required."); return; }
+      if (!token)    { showStatus("error", "Access token is required."); return; }
 
       btn.disabled = true;
       btn.textContent = "Posting...";
