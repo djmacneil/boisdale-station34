@@ -138,8 +138,8 @@
           <input type="text" id="f-author" placeholder="e.g. J. MacDonald">
         </div>
 
-        <!-- Category — shown for Events only -->
-        <div class="form-group" id="group-category" style="display:none">
+        <!-- Category -->
+        <div class="form-group" id="group-category">
           <label for="f-category">Category</label>
           <select id="f-category">
             <option value="">— select —</option>
@@ -161,7 +161,7 @@
           </div>
           <div class="form-group">
             <label for="f-end">Publish until</label>
-            <input type="date" id="f-end">
+            <input type="date" id="f-end" required>
             <p class="hint">Expiry date is required</p>
           </div>
         </div>
@@ -198,15 +198,14 @@
   <script src="../js/config.js"></script>
   <script>
 
-    // Set today as default start date
-    document.getElementById("f-start").value = new Date()
-      .toISOString().substring(0, 10);
+    // Set today as default start date, today+14 as default end date
+    const today = new Date();
+    document.getElementById("f-start").value = today.toISOString().substring(0, 10);
+    const endDefault = new Date(today);
+    endDefault.setDate(endDefault.getDate() + 14);
+    document.getElementById("f-end").value = endDefault.toISOString().substring(0, 10);
 
-    function updateForm() {
-      const sheet = document.getElementById("sheet-select").value;
-      document.getElementById("group-category").style.display =
-        sheet === "Events" ? "block" : "none";
-    }
+    function updateForm() {}
 
     async function submitPost() {
       const btn   = document.getElementById("submit-btn");
@@ -215,8 +214,10 @@
 
       showStatus("", "");
 
-      if (!title) { showStatus("error", "Title is required."); return; }
-      if (!token) { showStatus("error", "Access token is required."); return; }
+      const endDate = document.getElementById("f-end").value;
+      if (!title)   { showStatus("error", "Title is required."); return; }
+      if (!endDate) { showStatus("error", "Publish until date is required."); return; }
+      if (!token)   { showStatus("error", "Access token is required."); return; }
 
       btn.disabled = true;
       btn.textContent = "Posting...";
