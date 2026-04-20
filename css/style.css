@@ -315,36 +315,51 @@ nav a:hover, nav a.active {
 }
 
 /* ── Events table ─────────────────────────────────────────────── */
-.events-table {
-  width: 100%;
-  border-collapse: collapse;
+.events-list {
   font-family: var(--font-ui);
-  font-size: .92rem;
-  background: var(--white);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
+  font-size: .9rem;
 }
-
-.events-table th {
-  text-align: left;
-  padding: .65rem .85rem;
-  background: var(--primary);
-  color: #fff;
-  font-size: .78rem;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-}
-
-.events-table td {
-  padding: .65rem .85rem;
+.ev-group {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
-  vertical-align: top;
 }
-
-.events-table tr:last-child td { border-bottom: none; }
-.events-table td.ev-date { border-top: 2px solid var(--border); }
-.events-table tr:first-child td.ev-date { border-top: none; }
+.ev-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.ev-group-date {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: .4rem;
+}
+.ev-item {
+  display: flex;
+  gap: .65rem;
+  align-items: baseline;
+  padding: .2rem 0;
+}
+.ev-time {
+  color: #666;
+  font-size: .82rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 7rem;
+}
+.ev-title {
+  font-weight: 600;
+  color: var(--dark);
+}
+.ev-notes {
+  font-size: .8rem;
+  color: var(--mid);
+  font-weight: 400;
+  margin-top: .15rem;
+}
 
 .ev-date { white-space: nowrap; font-weight: 600; color: var(--dark); }
 .ev-time { white-space: nowrap; color: var(--mid); }

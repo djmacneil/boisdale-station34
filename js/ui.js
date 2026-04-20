@@ -93,20 +93,15 @@ const UI = (() => {
       groups[dateKey].push({ timeStr, title: ev.summary || "Untitled", notes: ev.description || "" });
     });
 
-    const rows = dateKeys.map(date => {
-      const eventsForDay = groups[date];
-      return eventsForDay.map((ev, i) => `<tr>
-        ${i === 0 ? `<td class="ev-date" rowspan="${eventsForDay.length}">${date}</td>` : ""}
-        <td class="ev-time">${ev.timeStr}</td>
-        <td class="ev-title">${escHtml(ev.title)}</td>
-        <td class="ev-notes">${ev.notes ? formatBody(ev.notes) : ""}</td>
-      </tr>`).join("");
-    }).join("");
-
-    el.innerHTML = `<table class="events-table">
-      <thead><tr><th>Date</th><th>Time</th><th>Event</th><th>Notes</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+    el.innerHTML = `<div class="events-list">` + dateKeys.map(date => `
+      <div class="ev-group">
+        <div class="ev-group-date">${date}</div>
+        ${groups[date].map(ev => `
+          <div class="ev-item">
+            <span class="ev-time">${ev.timeStr}</span>
+            <span class="ev-title">${escHtml(ev.title)}${ev.notes ? `<div class="ev-notes">${formatBody(ev.notes)}</div>` : ''}</span>
+          </div>`).join('')}
+      </div>`).join('') + `</div>`;
   }
 
   function _fmtTime(dt) {
