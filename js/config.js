@@ -49,7 +49,7 @@ const CONFIG = {
   FORMS_ENDPOINT: "https://script.google.com/macros/s/AKfycbzsiK1-C9ptkbbsXjUfIJ1HHSoU4cn82Iz0_j4f-pjUNNCXLh7AyNaEoJCK93z2fDTA/exec",
 
   // Google Apps Script endpoint for upload.html (file attachment support)
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzgliGDCrYSpP8pcn17XOT7_EqCGI1wPQVNvTHLHzm0GXI-nmlkEu7udxgc77_Qw5p1/exec",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxavQlwO3Rdkhs23-KTy95iPbKtYCwBkhP5YswWqKFinuCDhBHkD1QnAP9yfAQQOYhd/exec",
   // Google Calendar ID
   CALENDAR_ID: "6b0ea6f3876b6821ba60b35c25bc35e30ea09ec19de7d586fb4599681f28fd03@group.calendar.google.com",
 
