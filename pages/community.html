@@ -51,9 +51,23 @@
     document.title = "Community — " + CONFIG.SITE.HALL_SHORT;
 
     UI.showLoading("community-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.COMMUNITY)
-      .then(rows => UI.renderCards("community-container", rows, { emptyMessage: "No community information posted." }))
-      .catch(e  => UI.showError("community-container", e.message));
+    Promise.all([
+      GoogleAPI.fetchFiltered(CONFIG.SHEETS.COMMUNITY),
+      GoogleAPI.fetchPostsByCategory('Community')
+    ]).then(([legacyRows, postRows]) => {
+      const legacyHtml = legacyRows.length
+        ? legacyRows.map(row => `
+          <article class="card">
+            ${row.category ? `<span class="badge">${row.category}</span>` : ""}
+            <h3 class="card-title">${UI.escHtml(row.title || "Untitled")}</h3>
+            ${row.body ? `<div class="card-body">${UI.escHtml(row.body).replace(/\n/g,'<br>')}</div>` : ""}
+          </article>`).join('')
+        : '';
+      const postHtml = postRows.map(row => UI.buildPostCard(row)).join('');
+      const combined = legacyHtml + postHtml;
+      const el = document.getElementById('community-container');
+      el.innerHTML = combined || '<p class="empty-msg">No community information posted.</p>';
+    }).catch(e => UI.showError("community-container", e.message));
 
     UI.showLoading("drive-container");
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.GENERAL)

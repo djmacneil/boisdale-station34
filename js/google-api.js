@@ -134,6 +134,22 @@ const GoogleAPI = (() => {
     return data.items || [];
   }
 
+  // ─── Posts tab (upload.html submissions) ─────────────────────────────────
+
+  /**
+   * Fetch rows from the Posts tab where Category matches the given value.
+   * Returns raw arrays: [Timestamp, Date, Category, Title, Body, FileURL, FileName, FileType]
+   * Column order must match what Code.gs appends.
+   */
+  async function fetchPostsByCategory(category) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/Posts?key=${CONFIG.GOOGLE_API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Sheet fetch failed: ${res.status}`);
+    const data = await res.json();
+    const [, ...rows] = data.values || []; // skip header row
+    return rows.filter(row => (row[2] || '').trim() === category);
+  }
+
   // ─── Config sheet ─────────────────────────────────────────────────────────
 
   /**
@@ -150,5 +166,5 @@ const GoogleAPI = (() => {
     return cfg;
   }
 
-  return { fetchSheet, fetchFiltered, fetchUpcoming, filterByDate, filterUpcoming, listDriveFolder, mimeIcon, formatSize, fetchCalendarEvents, fetchConfig };
+  return { fetchSheet, fetchFiltered, fetchUpcoming, filterByDate, filterUpcoming, listDriveFolder, mimeIcon, formatSize, fetchCalendarEvents, fetchConfig, fetchPostsByCategory };
 })();
