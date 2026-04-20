@@ -275,28 +275,24 @@
     // ── Load ──────────────────────────────────────────────────────────────────
     async function loadPosts() {
       const token = getToken();
-      if (!token) { showStatus('Please enter your token.', 'error'); return; }
-      localStorage.setItem('bs34_post_token', token);
+      if (token) localStorage.setItem('bs34_post_token', token);
 
       const btn = document.getElementById('btn-load');
       btn.disabled = true;
       showStatus('Loading…', 'loading');
 
       try {
-        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'list', token })
-        });
-        const json = await res.json();
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/Posts?key=${CONFIG.GOOGLE_API_KEY}`;
+        const res  = await fetch(url);
+        const data = await res.json();
 
-        if (json.status !== 'ok') {
-          showStatus('Error: ' + json.message, 'error');
+        if (data.error) {
+          showStatus('Could not load posts: ' + data.error.message, 'error');
           return;
         }
 
-        const allRows = json.values || [];
-        // Skip header row (index 0); sheet row = array index + 1
+        const allRows = data.values || [];
+        // Skip header row; compute 1-based sheet row from array index
         posts = allRows.slice(1)
           .map((row, i) => ({ sheetRow: i + 2, row }))
           .reverse(); // newest first
