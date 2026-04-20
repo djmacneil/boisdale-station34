@@ -507,9 +507,14 @@ nav a:hover, nav a.active {
 /* ── Home page two-column layout ─────────────────────────────── */
 .home-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 0 2.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: 0 2rem;
   align-items: start;
+}
+.home-posts,
+.home-calendar {
+  min-width: 0;
+  overflow-x: hidden;
 }
 .home-calendar {
   position: sticky;
@@ -527,8 +532,8 @@ nav a:hover, nav a.active {
   }
   .home-calendar {
     position: static;
+    overflow-x: auto;
   }
-  /* Show calendar below posts on mobile */
   .home-posts  { order: 1; }
   .home-calendar { order: 2; }
 }
