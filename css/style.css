@@ -432,6 +432,40 @@ nav a:hover, nav a.active {
   color: var(--dark);
 }
 
+/* ── Post attachment cards ────────────────────────────────────── */
+.post-attachment {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+.post-attachment--image img {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 5px;
+  display: block;
+  margin-bottom: .4rem;
+  cursor: pointer;
+}
+.attachment-label {
+  font-size: .8rem;
+  color: #666;
+}
+.pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  background: #f0f4ff;
+  border: 1px solid #b3c6f7;
+  border-radius: 5px;
+  color: #1a4abf;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: .9rem;
+  transition: background .15s;
+}
+.pdf-link:hover { background: #dce8ff; }
+
 /* ── Footer ───────────────────────────────────────────────────── */
 footer {
   background: var(--dark);

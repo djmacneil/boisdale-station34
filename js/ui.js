@@ -165,5 +165,59 @@ const UI = (() => {
     }
   }
 
-  return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, applyConfig, escHtml, formatDate };
+  // ─── Attachment rendering ─────────────────────────────────────────────────
+
+  /**
+   * Convert a Drive sharing URL to a direct-view URL for inline images.
+   */
+  function driveShareToDirectUrl(shareUrl) {
+    const match = shareUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)\//);
+    if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    return shareUrl;
+  }
+
+  /**
+   * Build the HTML for a single post card, including an optional attachment.
+   * Row columns: Timestamp | Date | Category | Title | Body | FileURL | FileName | FileType
+   */
+  function buildPostCard(row) {
+    const [timestamp, date, category, title, body, fileUrl, fileName, fileType] = row;
+
+    let attachmentHtml = '';
+    if (fileUrl && fileType) {
+      if (fileType.startsWith('image/')) {
+        const directUrl = driveShareToDirectUrl(fileUrl);
+        attachmentHtml = `
+          <div class="post-attachment post-attachment--image">
+            <a href="${escHtml(fileUrl)}" target="_blank" rel="noopener">
+              <img src="${escHtml(directUrl)}"
+                   alt="${escHtml(fileName || 'Attachment')}"
+                   loading="lazy"
+                   onerror="this.closest('.post-attachment').style.display='none'">
+            </a>
+            <span class="attachment-label">📷 ${escHtml(fileName || 'Image')}</span>
+          </div>`;
+      } else if (fileType === 'application/pdf') {
+        attachmentHtml = `
+          <div class="post-attachment post-attachment--pdf">
+            <a href="${escHtml(fileUrl)}" target="_blank" rel="noopener" class="pdf-link">
+              📄 ${escHtml(fileName || 'Download PDF')}
+            </a>
+          </div>`;
+      }
+    }
+
+    return `
+      <div class="post-card">
+        <div class="post-meta">
+          <span class="post-category">${escHtml(category)}</span>
+          <span class="post-date">${formatDate(date)}</span>
+        </div>
+        <h3 class="post-title">${escHtml(title)}</h3>
+        <div class="post-body">${escHtml(body).replace(/\n/g, '<br>')}</div>
+        ${attachmentHtml}
+      </div>`;
+  }
+
+  return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, applyConfig, escHtml, formatDate, buildPostCard, driveShareToDirectUrl };
 })();

@@ -48,6 +48,9 @@ const CONFIG = {
   // Google Apps Script endpoint for form submissions
   FORMS_ENDPOINT: "https://script.google.com/macros/s/AKfycbzsiK1-C9ptkbbsXjUfIJ1HHSoU4cn82Iz0_j4f-pjUNNCXLh7AyNaEoJCK93z2fDTA/exec",
 
+  // Google Apps Script endpoint for upload.html (file attachment support)
+  APPS_SCRIPT_URL: "",  // paste your deployed doPost URL here
+
   // Google Calendar ID
   CALENDAR_ID: "6b0ea6f3876b6821ba60b35c25bc35e30ea09ec19de7d586fb4599681f28fd03@group.calendar.google.com",
 
