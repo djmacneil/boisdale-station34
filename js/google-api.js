@@ -137,17 +137,34 @@ const GoogleAPI = (() => {
   // ─── Posts tab (upload.html submissions) ─────────────────────────────────
 
   /**
-   * Fetch rows from the Posts tab where Category matches the given value.
-   * Returns raw arrays: [Timestamp, Date, Category, Title, Body, FileURL, FileName, FileType]
-   * Column order must match what Code.gs appends.
+   * Fetch rows from the Posts tab, optionally filtered by Category.
+   * Pass null/undefined for category to get all categories.
+   * Filters by StartDate (col 8) and EndDate (col 9) — empty means always visible.
+   * Returns raw arrays newest-first:
+   *   [Timestamp, Date, Category, Title, Body, FileURL, FileName, FileType, StartDate, EndDate]
    */
   async function fetchPostsByCategory(category) {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/Posts?key=${CONFIG.GOOGLE_API_KEY}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Sheet fetch failed: ${res.status}`);
     const data = await res.json();
-    const [, ...rows] = data.values || []; // skip header row
-    return rows.filter(row => (row[2] || '').trim() === category);
+    const allRows = data.values || [];
+    if (!allRows.length) return [];
+    // Skip header row if present (first cell = "Timestamp")
+    const rows = (allRows[0][0] || '').toLowerCase() === 'timestamp'
+      ? allRows.slice(1) : allRows;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return rows
+      .filter(row => {
+        if (category && (row[2] || '').trim() !== category) return false;
+        const start = row[8] ? parseLocalDate(row[8]) : new Date(0);
+        const end   = row[9] ? parseLocalDate(row[9]) : new Date('2099-12-31');
+        return today >= start && today <= end;
+      })
+      .reverse(); // newest first
   }
 
   // ─── Config sheet ─────────────────────────────────────────────────────────

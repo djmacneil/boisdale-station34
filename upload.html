@@ -260,8 +260,20 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="post-date">Date</label>
+          <label for="post-date">Post Date</label>
           <input type="date" id="post-date">
+        </div>
+      </div>
+
+      <!-- Visibility date range -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="post-start-date">Visible From <span class="optional-tag">optional — defaults to today</span></label>
+          <input type="date" id="post-start-date">
+        </div>
+        <div class="form-group">
+          <label for="post-end-date">Visible Until <span class="optional-tag">optional — leave blank to never expire</span></label>
+          <input type="date" id="post-end-date">
         </div>
       </div>
 
@@ -423,7 +435,9 @@
       btn.disabled = true;
       showStatus('Submitting…', 'loading');
 
-      const payload = { token, category, date, title, body };
+      const startDate = document.getElementById('post-start-date').value || date;
+      const endDate   = document.getElementById('post-end-date').value || '';
+      const payload = { token, category, date, title, body, start_date: startDate, end_date: endDate };
 
       // Attach file as base64 if one was selected
       if (selectedFile) {
@@ -491,6 +505,8 @@
     function clearForm() {
       document.getElementById('post-category').value = '';
       document.getElementById('post-date').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('post-start-date').value = '';
+      document.getElementById('post-end-date').value = '';
       document.getElementById('post-title').value = '';
       document.getElementById('post-body').value = '';
       document.getElementById('post-file').value = '';

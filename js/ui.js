@@ -168,11 +168,11 @@ const UI = (() => {
   // ─── Attachment rendering ─────────────────────────────────────────────────
 
   /**
-   * Convert a Drive sharing URL to a direct-view URL for inline images.
+   * Convert a Drive sharing URL to a thumbnail URL for inline images.
    */
   function driveShareToDirectUrl(shareUrl) {
-    const match = shareUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)\//);
-    if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    const match = shareUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
     return shareUrl;
   }
 
@@ -219,5 +219,23 @@ const UI = (() => {
       </div>`;
   }
 
-  return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, applyConfig, escHtml, formatDate, buildPostCard, driveShareToDirectUrl };
+  /**
+   * Build HTML for a single legacy sheet row (object with title/body/category/etc.)
+   * Mirrors what renderCards() renders per row.
+   */
+  function buildCard(row, options = {}) {
+    return `
+      <article class="card">
+        ${row.category ? `<span class="badge">${escHtml(row.category)}</span>` : ""}
+        <h3 class="card-title">${escHtml(row.title || "Untitled")}</h3>
+        ${row.body ? `<div class="card-body">${formatBody(row.body)}</div>` : ""}
+        <footer class="card-meta">
+          ${!options.hideAuthor  && row.author     ? `<span>${escHtml(row.author)}</span>` : ""}
+          ${row.start_date ? `<span>${formatDate(row.start_date)}</span>` : ""}
+          ${!options.hideExpires && row.end_date   ? `<span class="expires">Expires ${formatDate(row.end_date)}</span>` : ""}
+        </footer>
+      </article>`;
+  }
+
+  return { showLoading, showError, showEmpty, renderCards, renderEventsTable, renderFileList, renderCalendar, applyConfig, escHtml, formatDate, buildPostCard, buildCard, driveShareToDirectUrl };
 })();

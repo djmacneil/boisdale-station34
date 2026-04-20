@@ -45,9 +45,16 @@
   <script>
     document.title = "Notices — " + CONFIG.SITE.HALL_SHORT;
     UI.showLoading("notices-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES)
-      .then(rows => UI.renderCards("notices-container", rows, { emptyMessage: "No active notices at this time.", hideAuthor: true, hideExpires: true }))
-      .catch(e  => UI.showError("notices-container", e.message));
+    Promise.all([
+      GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES),
+      GoogleAPI.fetchPostsByCategory('Notice')
+    ]).then(([legacyRows, postRows]) => {
+      const legacyHtml = legacyRows.map(row => UI.buildCard(row, { hideAuthor: true, hideExpires: true })).join('');
+      const postHtml   = postRows.map(row => UI.buildPostCard(row)).join('');
+      const combined   = legacyHtml + postHtml;
+      const el = document.getElementById('notices-container');
+      el.innerHTML = combined || '<p class="empty-msg">No active notices at this time.</p>';
+    }).catch(e => UI.showError("notices-container", e.message));
     GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(() => {});
   </script>
 </body>

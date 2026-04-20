@@ -50,6 +50,10 @@
 
       <br>
 
+      <h2 class="page-title"><i data-lucide="megaphone" class="section-icon"></i>Recent Posts</h2>
+      <div id="posts-container"></div>
+      <br>
+
       <h2 class="page-title"><i data-lucide="siren" class="section-icon"></i><a href="pages/firedept.html">Fire Department</a></h2>
       <div id="meetings-container" class="card-grid"></div>
       <p style="margin-top:1rem;font-family:var(--font-ui);font-size:.9rem;">
@@ -107,6 +111,15 @@
     GoogleAPI.fetchCalendarEvents(CONFIG.CALENDAR_ID, 30)
       .then(events => UI.renderEventsTable("events-container", events))
       .catch(e => UI.showError("events-container", "Could not load events. " + e.message));
+
+    GoogleAPI.fetchPostsByCategory(null)
+      .then(rows => {
+        const el = document.getElementById('posts-container');
+        if (!rows.length) { el.style.display = 'none'; return; }
+        el.className = 'card-grid';
+        el.innerHTML = rows.slice(0, 4).map(row => UI.buildPostCard(row)).join('');
+      })
+      .catch(() => document.getElementById('posts-container').style.display = 'none');
 
     UI.showLoading("meetings-container");
     GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
