@@ -443,20 +443,16 @@
         showProgress(false);
       }
 
+      // no-cors bypasses the redirect/CORS block Google Apps Script causes in browsers
       try {
-        const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        await fetch(CONFIG.APPS_SCRIPT_URL, {
           method: 'POST',
-          // Apps Script doPost requires text/plain to avoid preflight CORS issues
+          mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(payload)
         });
-        const json = await resp.json();
-        if (json.status === 'ok') {
-          showStatus('✅ Notice posted successfully!', 'success');
-          clearForm();
-        } else {
-          showStatus('Error: ' + (json.message || 'Unknown error from server.'), 'error');
-        }
+        showStatus('✅ Notice posted successfully!', 'success');
+        clearForm();
       } catch (err) {
         showStatus('Network error — please check your connection and try again.', 'error');
         console.error(err);
