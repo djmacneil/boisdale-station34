@@ -225,7 +225,7 @@
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn-save" onclick="createEvent()">Create Event</button>
+          <button class="btn-save" onclick="submitNewEvent()">Create Event</button>
           <button class="btn-cancel" onclick="toggleNewForm()">Cancel</button>
           <span class="form-status" id="n-status"></span>
         </div>
@@ -409,7 +409,7 @@
     }
 
     // ── Create event ──────────────────────────────────────────────────────────
-    async function createEvent() {
+    async function submitNewEvent() {
       const token = getToken();
       if (!token) { setStatus('n-status', 'Please enter your token first.', 'error'); return; }
       localStorage.setItem('bs34_post_token', token);
