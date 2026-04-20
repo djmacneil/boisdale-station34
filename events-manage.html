@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Events · Boisdale Fire Station 34</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .manage-wrap {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .manage-header-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .manage-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    h2.manage-title { margin: 0; font-size: 1.3rem; color: #222; }
+
+    .token-row { display: flex; gap: .5rem; margin-top: .4rem; }
+    .token-row input {
+      flex: 1; padding: .55rem .75rem;
+      border: 1px solid #d4aa40; border-radius: 5px;
+      font-family: monospace; font-size: 1rem; background: #fff;
+    }
+    .btn-load {
+      padding: .55rem 1.25rem; background: #1a5c2a; color: #fff;
+      border: none; border-radius: 5px; font-weight: 700;
+      font-size: .95rem; cursor: pointer; white-space: nowrap;
+    }
+    .btn-load:hover { background: #154a22; }
+    .btn-load:disabled { background: #bbb; cursor: not-allowed; }
+    .btn-new {
+      padding: .45rem 1rem; background: #c0392b; color: #fff;
+      border: none; border-radius: 5px; font-weight: 700;
+      font-size: .9rem; cursor: pointer; text-decoration: none;
+      display: inline-block;
+    }
+    .btn-new:hover { background: #a93226; }
+
+    #manage-status {
+      display: none; margin-top: .75rem;
+      padding: .6rem 1rem; border-radius: 5px; font-size: .9rem;
+    }
+    #manage-status.success { background: #eafaf1; border: 1px solid #a9dfbf; color: #1e6b3a; }
+    #manage-status.error   { background: #fdecea; border: 1px solid #f5aca6; color: #922b21; }
+    #manage-status.loading { background: #eaf4fb; border: 1px solid #aed6f1; color: #1a5276; }
+
+    /* New event panel */
+    .new-event-panel {
+      display: none;
+      background: #f0f7ff;
+      border: 1px solid #b3d4f5;
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .new-event-panel.open { display: block; }
+    .new-event-panel h3 { margin: 0 0 1rem; font-size: 1rem; color: #1a4abf; }
+
+    /* Shared form grid */
+    .ev-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem 1rem;
+    }
+    @media (max-width: 540px) { .ev-form-grid { grid-template-columns: 1fr; } }
+    .ev-form-grid .span2 { grid-column: 1 / -1; }
+    .ev-form-grid label {
+      display: block; font-weight: 600;
+      font-size: .85rem; color: #333; margin-bottom: .3rem;
+    }
+    .ev-form-grid input[type="text"],
+    .ev-form-grid input[type="date"],
+    .ev-form-grid input[type="time"],
+    .ev-form-grid textarea {
+      width: 100%; padding: .5rem .65rem;
+      border: 1px solid #ccc; border-radius: 4px;
+      font-size: .95rem; font-family: inherit; box-sizing: border-box;
+    }
+    .ev-form-grid textarea { min-height: 80px; resize: vertical; }
+    .allday-row {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .9rem; font-family: var(--font-ui);
+    }
+    .allday-row input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; }
+    .time-field { transition: opacity .15s; }
+    .time-field.hidden { opacity: .3; pointer-events: none; }
+
+    .form-actions {
+      display: flex; gap: .5rem; margin-top: 1rem; align-items: center;
+    }
+    .btn-save {
+      padding: .5rem 1.25rem; background: #1a5c2a; color: #fff;
+      border: none; border-radius: 5px; font-weight: 700; cursor: pointer; font-size: .92rem;
+    }
+    .btn-save:hover { background: #154a22; }
+    .btn-cancel {
+      padding: .5rem 1rem; background: #fff; border: 1px solid #ccc;
+      border-radius: 5px; cursor: pointer; font-size: .92rem;
+    }
+    .btn-cancel:hover { background: #f5f5f5; }
+    .form-status {
+      display: none; font-size: .85rem; margin-left: .5rem;
+    }
+    .form-status.success { color: #1e6b3a; }
+    .form-status.error   { color: #922b21; }
+    .form-status.loading { color: #1a5276; }
+
+    /* Event list rows */
+    .ev-item-row {
+      background: #fff; border: 1px solid #ddd;
+      border-radius: 6px; margin-bottom: .4rem;
+    }
+    .ev-item-header {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .7rem 1rem;
+    }
+    .ev-item-when {
+      flex-shrink: 0; min-width: 9rem;
+      font-family: var(--font-ui); font-size: .82rem; color: #555;
+    }
+    .ev-item-title {
+      flex: 1; font-weight: 600; color: #222;
+      min-width: 0; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+    .ev-item-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+    .btn-edit {
+      padding: .3rem .75rem; background: #e8f0fe;
+      border: 1px solid #aac4f8; color: #1a4abf;
+      border-radius: 4px; cursor: pointer; font-size: .82rem; font-weight: 600;
+    }
+    .btn-edit:hover, .btn-edit.active { background: #d0e1fc; }
+    .btn-del {
+      padding: .3rem .75rem; background: #fdecea;
+      border: 1px solid #f5aca6; color: #922b21;
+      border-radius: 4px; cursor: pointer; font-size: .82rem; font-weight: 600;
+    }
+    .btn-del:hover { background: #fbd7d4; }
+
+    .edit-panel {
+      display: none;
+      background: #f8f9ff; border-top: 1px solid #c5d3f5;
+      border-radius: 0 0 6px 6px;
+      padding: 1.25rem 1.5rem 1rem;
+    }
+    .edit-panel.open { display: block; }
+    .ev-item-row.editing { border-color: #c5d3f5; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+
+    .empty-msg { color: #888; font-style: italic; padding: 1rem 0; }
+  </style>
+</head>
+<body class="page-wrap">
+
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Boisdale Fire Station 34</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="pages/notices.html">Notices</a>
+        <a href="pages/meetings.html">Fire Dept.</a>
+        <a href="pages/calendar.html">Calendar</a>
+        <a href="pages/projects.html">Projects</a>
+        <a href="pages/firedept.html">Minutes</a>
+        <a href="pages/community.html">Community</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="manage-wrap">
+
+    <div class="manage-header-card">
+      <div class="manage-title-row">
+        <h2 class="manage-title">Manage Calendar Events</h2>
+        <button class="btn-new" onclick="toggleNewForm()">+ New Event</button>
+      </div>
+
+      <!-- New event form -->
+      <div class="new-event-panel" id="new-panel">
+        <h3>New Event</h3>
+        <div class="ev-form-grid">
+          <div class="span2">
+            <label>Title</label>
+            <input type="text" id="n-title" placeholder="Event title">
+          </div>
+          <div class="span2">
+            <div class="allday-row">
+              <input type="checkbox" id="n-allday" onchange="toggleTime('n')">
+              <label for="n-allday" style="font-weight:400;margin:0;">All day event</label>
+            </div>
+          </div>
+          <div>
+            <label>Start Date</label>
+            <input type="date" id="n-start-date">
+          </div>
+          <div class="time-field" id="n-start-time-wrap">
+            <label>Start Time</label>
+            <input type="time" id="n-start-time" value="09:00">
+          </div>
+          <div>
+            <label>End Date <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="date" id="n-end-date">
+          </div>
+          <div class="time-field" id="n-end-time-wrap">
+            <label>End Time</label>
+            <input type="time" id="n-end-time" value="10:00">
+          </div>
+          <div class="span2">
+            <label>Description <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <textarea id="n-description" placeholder="Details, notes…"></textarea>
+          </div>
+          <div class="span2">
+            <label>Location <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="text" id="n-location" placeholder="Address or place name">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="createEvent()">Create Event</button>
+          <button class="btn-cancel" onclick="toggleNewForm()">Cancel</button>
+          <span class="form-status" id="n-status"></span>
+        </div>
+      </div>
+
+      <!-- Token + load -->
+      <div class="token-group">
+        <label for="manage-token">Contributor Token</label>
+        <div class="token-row">
+          <input type="password" id="manage-token" placeholder="Enter your shared token" autocomplete="off">
+          <button id="btn-load" class="btn-load" onclick="loadEvents()">Load Events</button>
+        </div>
+        <div class="token-note">Token is saved to this browser.</div>
+      </div>
+
+      <div id="manage-status"></div>
+    </div>
+
+    <div id="events-list"></div>
+
+  </div>
+
+  <footer id="site-footer">
+    <div class="container">
+      Boisdale Fire Station 34 &nbsp;·&nbsp;
+      3810 Grand Narrows Highway, Boisdale, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100" id="footer-phone">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:boisdalevfd@gmail.com" id="footer-email">boisdalevfd@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/google-api.js"></script>
+  <script>
+    // ── Token ─────────────────────────────────────────────────────────────────
+    const tokenInput = document.getElementById('manage-token');
+    const savedTok   = localStorage.getItem('bs34_post_token');
+    if (savedTok) tokenInput.value = savedTok;
+    tokenInput.addEventListener('change', () => {
+      if (tokenInput.value) localStorage.setItem('bs34_post_token', tokenInput.value);
+    });
+    function getToken() { return tokenInput.value.trim(); }
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let events = []; // raw Calendar API event objects
+
+    // Default new-event date to today
+    document.getElementById('n-start-date').value = today();
+    document.getElementById('n-end-date').value   = today();
+
+    // ── Load events ───────────────────────────────────────────────────────────
+    async function loadEvents() {
+      const btn = document.getElementById('btn-load');
+      btn.disabled = true;
+      showStatus('Loading…', 'loading');
+      try {
+        events = await GoogleAPI.fetchCalendarEvents(CONFIG.CALENDAR_ID, 180);
+        showStatus('', '');
+        renderList();
+      } catch (err) {
+        showStatus('Could not load events: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Render list ───────────────────────────────────────────────────────────
+    function renderList() {
+      const container = document.getElementById('events-list');
+      if (!events.length) {
+        container.innerHTML = '<p class="empty-msg">No upcoming events found.</p>';
+        return;
+      }
+      container.innerHTML = events.map((ev, idx) => {
+        const when  = fmtWhen(ev);
+        const title = esc(ev.summary || 'Untitled');
+        return `
+          <div class="ev-item-row" id="evrow-${idx}">
+            <div class="ev-item-header">
+              <div class="ev-item-when">${when}</div>
+              <div class="ev-item-title" title="${title}">${title}</div>
+              <div class="ev-item-actions">
+                <button class="btn-edit" id="evbtn-${idx}" onclick="toggleEdit(${idx})">Edit</button>
+                <button class="btn-del" onclick="deleteEvent(${idx})">Delete</button>
+              </div>
+            </div>
+            <div class="edit-panel" id="evpanel-${idx}">
+              ${buildEditForm(idx, ev)}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Build edit form ───────────────────────────────────────────────────────
+    function buildEditForm(idx, ev) {
+      const isAllDay   = !!ev.start.date;
+      const startDate  = isAllDay ? ev.start.date : ev.start.dateTime.slice(0, 10);
+      const endDate    = isAllDay
+        ? offsetDate(ev.end.date, -1)   // Calendar API end date is exclusive
+        : ev.end.dateTime.slice(0, 10);
+      const startTime  = isAllDay ? '09:00' : ev.start.dateTime.slice(11, 16);
+      const endTime    = isAllDay ? '10:00' : ev.end.dateTime.slice(11, 16);
+      const desc       = esc(ev.description || '');
+      const loc        = esc(ev.location || '');
+      const title      = esc(ev.summary || '');
+      const allDayChk  = isAllDay ? 'checked' : '';
+
+      return `
+        <div class="ev-form-grid">
+          <div class="span2">
+            <label>Title</label>
+            <input type="text" id="et-${idx}" value="${title}">
+          </div>
+          <div class="span2">
+            <div class="allday-row">
+              <input type="checkbox" id="ea-${idx}" ${allDayChk} onchange="toggleTime('e${idx}')">
+              <label for="ea-${idx}" style="font-weight:400;margin:0;">All day event</label>
+            </div>
+          </div>
+          <div>
+            <label>Start Date</label>
+            <input type="date" id="esd-${idx}" value="${startDate}">
+          </div>
+          <div class="time-field ${isAllDay ? 'hidden' : ''}" id="e${idx}-start-time-wrap">
+            <label>Start Time</label>
+            <input type="time" id="est-${idx}" value="${startTime}">
+          </div>
+          <div>
+            <label>End Date <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="date" id="eed-${idx}" value="${endDate}">
+          </div>
+          <div class="time-field ${isAllDay ? 'hidden' : ''}" id="e${idx}-end-time-wrap">
+            <label>End Time</label>
+            <input type="time" id="eet-${idx}" value="${endTime}">
+          </div>
+          <div class="span2">
+            <label>Description <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <textarea id="edesc-${idx}">${desc}</textarea>
+          </div>
+          <div class="span2">
+            <label>Location <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="text" id="eloc-${idx}" value="${loc}">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="saveEdit(${idx})">Save Changes</button>
+          <button class="btn-cancel" onclick="toggleEdit(${idx})">Cancel</button>
+          <span class="form-status" id="epanel-status-${idx}"></span>
+        </div>`;
+    }
+
+    // ── Toggle new event form ─────────────────────────────────────────────────
+    function toggleNewForm() {
+      const panel = document.getElementById('new-panel');
+      panel.classList.toggle('open');
+    }
+
+    // ── Toggle time fields ────────────────────────────────────────────────────
+    function toggleTime(prefix) {
+      const allDay = document.getElementById(prefix === 'n' ? 'n-allday' : `ea-${prefix.slice(1)}`).checked;
+      const startWrap = document.getElementById(prefix + '-start-time-wrap');
+      const endWrap   = document.getElementById(prefix + '-end-time-wrap');
+      if (startWrap) startWrap.classList.toggle('hidden', allDay);
+      if (endWrap)   endWrap.classList.toggle('hidden', allDay);
+    }
+
+    // ── Toggle edit panel ─────────────────────────────────────────────────────
+    function toggleEdit(idx) {
+      const panel  = document.getElementById(`evpanel-${idx}`);
+      const row    = document.getElementById(`evrow-${idx}`);
+      const btn    = document.getElementById(`evbtn-${idx}`);
+      const isOpen = panel.classList.contains('open');
+      document.querySelectorAll('.edit-panel.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.ev-item-row.editing').forEach(r => r.classList.remove('editing'));
+      document.querySelectorAll('.btn-edit.active').forEach(b => b.classList.remove('active'));
+      if (!isOpen) {
+        panel.classList.add('open');
+        row.classList.add('editing');
+        btn.classList.add('active');
+      }
+    }
+
+    // ── Create event ──────────────────────────────────────────────────────────
+    async function createEvent() {
+      const token = getToken();
+      if (!token) { setStatus('n-status', 'Please enter your token first.', 'error'); return; }
+      localStorage.setItem('bs34_post_token', token);
+
+      const allDay = document.getElementById('n-allday').checked;
+      const payload = {
+        action:      'cal-create',
+        token,
+        title:       document.getElementById('n-title').value.trim(),
+        start_date:  document.getElementById('n-start-date').value,
+        end_date:    document.getElementById('n-end-date').value,
+        start_time:  allDay ? '' : document.getElementById('n-start-time').value,
+        end_time:    allDay ? '' : document.getElementById('n-end-time').value,
+        all_day:     allDay,
+        description: document.getElementById('n-description').value.trim(),
+        location:    document.getElementById('n-location').value.trim(),
+      };
+
+      if (!payload.title)      { setStatus('n-status', 'Title is required.', 'error'); return; }
+      if (!payload.start_date) { setStatus('n-status', 'Start date is required.', 'error'); return; }
+
+      setStatus('n-status', 'Creating…', 'loading');
+      const result = await callScript(payload);
+      if (result.status === 'ok') {
+        setStatus('n-status', '✅ Event created!', 'success');
+        clearNewForm();
+        setTimeout(() => loadEvents(), 1000);
+      } else {
+        setStatus('n-status', 'Error: ' + result.message, 'error');
+      }
+    }
+
+    function clearNewForm() {
+      document.getElementById('n-title').value       = '';
+      document.getElementById('n-start-date').value  = today();
+      document.getElementById('n-end-date').value    = today();
+      document.getElementById('n-start-time').value  = '09:00';
+      document.getElementById('n-end-time').value    = '10:00';
+      document.getElementById('n-description').value = '';
+      document.getElementById('n-location').value    = '';
+      document.getElementById('n-allday').checked    = false;
+      toggleTime('n');
+    }
+
+    // ── Save edit ─────────────────────────────────────────────────────────────
+    async function saveEdit(idx) {
+      const token = getToken();
+      if (!token) { setStatus(`epanel-status-${idx}`, 'Please enter your token.', 'error'); return; }
+
+      const allDay = document.getElementById(`ea-${idx}`).checked;
+      const payload = {
+        action:      'cal-edit',
+        token,
+        event_id:    events[idx].id,
+        title:       document.getElementById(`et-${idx}`).value.trim(),
+        start_date:  document.getElementById(`esd-${idx}`).value,
+        end_date:    document.getElementById(`eed-${idx}`).value,
+        start_time:  allDay ? '' : document.getElementById(`est-${idx}`).value,
+        end_time:    allDay ? '' : document.getElementById(`eet-${idx}`).value,
+        all_day:     allDay,
+        description: document.getElementById(`edesc-${idx}`).value.trim(),
+        location:    document.getElementById(`eloc-${idx}`).value.trim(),
+      };
+
+      setStatus(`epanel-status-${idx}`, 'Saving…', 'loading');
+      const result = await callScript(payload);
+      if (result.status === 'ok') {
+        setStatus(`epanel-status-${idx}`, '✅ Saved!', 'success');
+        setTimeout(() => loadEvents(), 1000);
+      } else {
+        setStatus(`epanel-status-${idx}`, 'Error: ' + result.message, 'error');
+      }
+    }
+
+    // ── Delete event ──────────────────────────────────────────────────────────
+    async function deleteEvent(idx) {
+      const ev = events[idx];
+      if (!confirm(`Delete "${ev.summary || 'this event'}"?\n\nThis cannot be undone.`)) return;
+      const token = getToken();
+      if (!token) { showStatus('Please enter your token.', 'error'); return; }
+
+      showStatus('Deleting…', 'loading');
+      const result = await callScript({ action: 'cal-delete', token, event_id: ev.id });
+      if (result.status === 'ok') {
+        showStatus('Event deleted.', 'success');
+        setTimeout(() => loadEvents(), 600);
+      } else {
+        showStatus('Error: ' + result.message, 'error');
+      }
+    }
+
+    // ── Apps Script call ──────────────────────────────────────────────────────
+    async function callScript(payload) {
+      try {
+        const res  = await fetch(CONFIG.APPS_SCRIPT_URL, {
+          method:  'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body:    JSON.stringify(payload)
+        });
+        return await res.json();
+      } catch (err) {
+        return { status: 'error', message: 'Network error — ' + err.message };
+      }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function fmtWhen(ev) {
+      if (ev.start.date) {
+        // All-day
+        const d = new Date(ev.start.date + 'T00:00:00');
+        return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+      const d = new Date(ev.start.dateTime);
+      return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })
+        + ' ' + d.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+
+    function today() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    // Calendar API all-day end dates are exclusive (day after); subtract 1 day for display
+    function offsetDate(dateStr, days) {
+      const d = new Date(dateStr + 'T00:00:00');
+      d.setDate(d.getDate() + days);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('manage-status');
+      if (!msg) { el.style.display = 'none'; return; }
+      el.textContent  = msg;
+      el.className    = type;
+      el.style.display = 'block';
+    }
+
+    function setStatus(id, msg, type) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent  = msg;
+      el.className    = 'form-status ' + type;
+      el.style.display = 'inline';
+    }
+
+    function esc(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
