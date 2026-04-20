@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Posts · Boisdale Fire Station 34</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .manage-wrap {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .manage-header-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    h2.manage-title {
+      margin: 0 0 1.25rem;
+      font-size: 1.3rem;
+      color: #222;
+    }
+    .token-row {
+      display: flex;
+      gap: .5rem;
+      margin-top: .4rem;
+    }
+    .token-row input {
+      flex: 1;
+      padding: .55rem .75rem;
+      border: 1px solid #d4aa40;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 1rem;
+      background: #fff;
+    }
+    .btn-load {
+      padding: .55rem 1.25rem;
+      background: #1a5c2a;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: .95rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-load:hover { background: #154a22; }
+    .btn-load:disabled { background: #bbb; cursor: not-allowed; }
+
+    /* Status message */
+    #manage-status {
+      display: none;
+      margin-top: .75rem;
+      padding: .6rem 1rem;
+      border-radius: 5px;
+      font-size: .9rem;
+    }
+    #manage-status.success { background: #eafaf1; border: 1px solid #a9dfbf; color: #1e6b3a; }
+    #manage-status.error   { background: #fdecea; border: 1px solid #f5aca6; color: #922b21; }
+    #manage-status.loading { background: #eaf4fb; border: 1px solid #aed6f1; color: #1a5276; }
+
+    /* Post rows */
+    .post-item {
+      margin-bottom: .4rem;
+    }
+    .post-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem 1rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: default;
+    }
+    .post-row-badge { flex-shrink: 0; }
+    .post-row-date {
+      color: #888;
+      font-size: .82rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-family: var(--font-ui, sans-serif);
+    }
+    .post-row-title {
+      flex: 1;
+      font-weight: 600;
+      color: #222;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .post-row-actions {
+      display: flex;
+      gap: .4rem;
+      flex-shrink: 0;
+    }
+    .btn-edit {
+      padding: .3rem .75rem;
+      background: #e8f0fe;
+      border: 1px solid #aac4f8;
+      color: #1a4abf;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .btn-edit:hover, .btn-edit.active { background: #d0e1fc; }
+    .btn-del {
+      padding: .3rem .75rem;
+      background: #fdecea;
+      border: 1px solid #f5aca6;
+      color: #922b21;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .btn-del:hover { background: #fbd7d4; }
+
+    /* Inline edit panel */
+    .edit-panel {
+      display: none;
+      background: #f8f9ff;
+      border: 1px solid #c5d3f5;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 1.25rem 1.5rem 1rem;
+      margin-top: -4px;
+    }
+    .edit-panel.open { display: block; }
+    .post-row.editing {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-color: #c5d3f5;
+    }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem 1rem;
+    }
+    @media (max-width: 540px) { .edit-grid { grid-template-columns: 1fr; } }
+    .edit-grid .span2 { grid-column: 1 / -1; }
+    .edit-grid label {
+      display: block;
+      font-weight: 600;
+      font-size: .85rem;
+      color: #333;
+      margin-bottom: .3rem;
+    }
+    .edit-grid input[type="text"],
+    .edit-grid input[type="date"],
+    .edit-grid select,
+    .edit-grid textarea {
+      width: 100%;
+      padding: .5rem .65rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: .95rem;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    .edit-grid textarea { min-height: 100px; resize: vertical; }
+
+    .edit-actions {
+      display: flex;
+      gap: .5rem;
+      margin-top: 1rem;
+      align-items: center;
+    }
+    .btn-save {
+      padding: .5rem 1.25rem;
+      background: #1a5c2a;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: .92rem;
+    }
+    .btn-save:hover { background: #154a22; }
+    .btn-cancel {
+      padding: .5rem 1rem;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: .92rem;
+    }
+    .btn-cancel:hover { background: #f5f5f5; }
+    .edit-status {
+      display: none;
+      font-size: .85rem;
+      margin-left: .5rem;
+    }
+    .edit-status.success { color: #1e6b3a; }
+    .edit-status.error   { color: #922b21; }
+    .edit-status.loading { color: #1a5276; }
+
+    .attachment-note {
+      font-size: .8rem;
+      color: #888;
+      margin-top: .25rem;
+    }
+    .empty-msg { color: #888; font-style: italic; padding: 1rem 0; }
+  </style>
+</head>
+<body class="page-wrap">
+
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Boisdale Fire Station 34</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="pages/notices.html">Notices</a>
+        <a href="pages/meetings.html">Fire Dept.</a>
+        <a href="pages/calendar.html">Calendar</a>
+        <a href="pages/projects.html">Projects</a>
+        <a href="pages/firedept.html">Minutes</a>
+        <a href="pages/community.html">Community</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="manage-wrap">
+
+    <div class="manage-header-card">
+      <h2 class="manage-title">Manage Posts</h2>
+
+      <div class="token-group">
+        <label for="manage-token">Contributor Token</label>
+        <div class="token-row">
+          <input type="password" id="manage-token" placeholder="Enter your shared token" autocomplete="off">
+          <button id="btn-load" class="btn-load" onclick="loadPosts()">Load Posts</button>
+        </div>
+        <div class="token-note">Token is saved to this browser.</div>
+      </div>
+
+      <div id="manage-status"></div>
+    </div>
+
+    <div id="posts-list"></div>
+
+  </div>
+
+  <footer id="site-footer">
+    <div class="container">
+      Boisdale Fire Station 34 &nbsp;·&nbsp;
+      3810 Grand Narrows Highway, Boisdale, NS &nbsp;·&nbsp;
+      <a href="tel:9025550100" id="footer-phone">(902) 555-0100</a> &nbsp;·&nbsp;
+      <a href="mailto:boisdalevfd@gmail.com" id="footer-email">boisdalevfd@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script>
+    // ── Token persistence ─────────────────────────────────────────────────────
+    const tokenInput = document.getElementById('manage-token');
+    const saved = localStorage.getItem('bs34_post_token');
+    if (saved) tokenInput.value = saved;
+    tokenInput.addEventListener('change', () => {
+      if (tokenInput.value) localStorage.setItem('bs34_post_token', tokenInput.value);
+    });
+
+    function getToken() { return tokenInput.value.trim(); }
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let posts = []; // [{ sheetRow, row: [] }]
+
+    // ── Load ──────────────────────────────────────────────────────────────────
+    async function loadPosts() {
+      const token = getToken();
+      if (!token) { showStatus('Please enter your token.', 'error'); return; }
+      localStorage.setItem('bs34_post_token', token);
+
+      const btn = document.getElementById('btn-load');
+      btn.disabled = true;
+      showStatus('Loading…', 'loading');
+
+      try {
+        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'list', token })
+        });
+        const json = await res.json();
+
+        if (json.status !== 'ok') {
+          showStatus('Error: ' + json.message, 'error');
+          return;
+        }
+
+        const allRows = json.values || [];
+        // Skip header row (index 0); sheet row = array index + 1
+        posts = allRows.slice(1)
+          .map((row, i) => ({ sheetRow: i + 2, row }))
+          .reverse(); // newest first
+
+        showStatus('', '');
+        renderList();
+      } catch (err) {
+        showStatus('Network error — ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Render list ───────────────────────────────────────────────────────────
+    function renderList() {
+      const container = document.getElementById('posts-list');
+      if (!posts.length) {
+        container.innerHTML = '<p class="empty-msg">No posts found in the Posts tab.</p>';
+        return;
+      }
+
+      container.innerHTML = posts.map((p, idx) => {
+        const cat   = esc(p.row[2] || '—');
+        const date  = p.row[1] || '';
+        const title = esc(p.row[3] || 'Untitled');
+        return `
+          <div class="post-item" id="item-${idx}">
+            <div class="post-row" id="row-${idx}">
+              <div class="post-row-badge"><span class="badge">${cat}</span></div>
+              <div class="post-row-date">${date}</div>
+              <div class="post-row-title" title="${title}">${title}</div>
+              <div class="post-row-actions">
+                <button class="btn-edit" id="editbtn-${idx}" onclick="toggleEdit(${idx})">Edit</button>
+                <button class="btn-del" onclick="deletePost(${idx})">Delete</button>
+              </div>
+            </div>
+            <div class="edit-panel" id="edit-${idx}">
+              ${buildEditForm(idx, p)}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Edit form ─────────────────────────────────────────────────────────────
+    function buildEditForm(idx, p) {
+      const [, date, cat, title, body, fileUrl, fileName, , startDate, endDate] = p.row;
+      const cats = ['Notice', 'FireDept', 'Community', 'Projects'];
+      const catOptions = cats.map(c =>
+        `<option value="${c}" ${c === cat ? 'selected' : ''}>${c === 'Projects' ? 'Project Update' : c}</option>`
+      ).join('');
+
+      return `
+        <div class="edit-grid">
+          <div>
+            <label>Category</label>
+            <select id="ec-${idx}">${catOptions}</select>
+          </div>
+          <div>
+            <label>Post Date</label>
+            <input type="date" id="ed-${idx}" value="${esc(date || '')}">
+          </div>
+          <div>
+            <label>Visible From <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="date" id="es-${idx}" value="${esc(startDate || '')}">
+          </div>
+          <div>
+            <label>Visible Until <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="date" id="ee-${idx}" value="${esc(endDate || '')}">
+          </div>
+          <div class="span2">
+            <label>Title</label>
+            <input type="text" id="et-${idx}" value="${esc(title || '')}">
+          </div>
+          <div class="span2">
+            <label>Body</label>
+            <textarea id="eb-${idx}">${esc(body || '')}</textarea>
+          </div>
+          ${fileUrl ? `<div class="span2 attachment-note">Attachment: ${esc(fileName || fileUrl)} &nbsp;·&nbsp; <em>File cannot be changed here — delete and re-post to change the attachment.</em></div>` : ''}
+        </div>
+        <div class="edit-actions">
+          <button class="btn-save" onclick="saveEdit(${idx}, ${p.sheetRow})">Save Changes</button>
+          <button class="btn-cancel" onclick="toggleEdit(${idx})">Cancel</button>
+          <span class="edit-status" id="es-msg-${idx}"></span>
+        </div>`;
+    }
+
+    // ── Toggle edit panel ─────────────────────────────────────────────────────
+    function toggleEdit(idx) {
+      const panel  = document.getElementById(`edit-${idx}`);
+      const row    = document.getElementById(`row-${idx}`);
+      const btn    = document.getElementById(`editbtn-${idx}`);
+      const isOpen = panel.classList.contains('open');
+      // Close any other open panels first
+      document.querySelectorAll('.edit-panel.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.post-row.editing').forEach(r => r.classList.remove('editing'));
+      document.querySelectorAll('.btn-edit.active').forEach(b => b.classList.remove('active'));
+      if (!isOpen) {
+        panel.classList.add('open');
+        row.classList.add('editing');
+        btn.classList.add('active');
+      }
+    }
+
+    // ── Save edit ─────────────────────────────────────────────────────────────
+    async function saveEdit(idx, sheetRow) {
+      const token = getToken();
+      const msgEl = document.getElementById(`es-msg-${idx}`);
+
+      const payload = {
+        action:     'edit',
+        token,
+        sheetRow,
+        category:   document.getElementById(`ec-${idx}`).value,
+        date:       document.getElementById(`ed-${idx}`).value,
+        title:      document.getElementById(`et-${idx}`).value,
+        body:       document.getElementById(`eb-${idx}`).value,
+        start_date: document.getElementById(`es-${idx}`).value,
+        end_date:   document.getElementById(`ee-${idx}`).value,
+      };
+
+      setEditStatus(msgEl, 'Saving…', 'loading');
+
+      try {
+        const res  = await fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.status === 'ok') {
+          setEditStatus(msgEl, '✅ Saved!', 'success');
+          setTimeout(() => loadPosts(), 900);
+        } else {
+          setEditStatus(msgEl, 'Error: ' + json.message, 'error');
+        }
+      } catch (err) {
+        setEditStatus(msgEl, 'Network error.', 'error');
+      }
+    }
+
+    // ── Delete ────────────────────────────────────────────────────────────────
+    async function deletePost(idx) {
+      const p     = posts[idx];
+      const title = p.row[3] || 'this post';
+      if (!confirm(`Delete "${title}"?\n\nThis cannot be undone.`)) return;
+
+      const token = getToken();
+      showStatus('Deleting…', 'loading');
+
+      try {
+        const res  = await fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'delete', token, sheetRow: p.sheetRow })
+        });
+        const json = await res.json();
+        if (json.status === 'ok') {
+          showStatus('Post deleted.', 'success');
+          setTimeout(() => loadPosts(), 600);
+        } else {
+          showStatus('Error: ' + json.message, 'error');
+        }
+      } catch (err) {
+        showStatus('Network error.', 'error');
+      }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function showStatus(msg, type) {
+      const el = document.getElementById('manage-status');
+      if (!msg) { el.style.display = 'none'; return; }
+      el.textContent = msg;
+      el.className   = type;
+      el.style.display = 'block';
+    }
+
+    function setEditStatus(el, msg, type) {
+      el.textContent  = msg;
+      el.className    = 'edit-status ' + type;
+      el.style.display = 'inline';
+    }
+
+    function esc(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
