@@ -53,16 +53,12 @@
     document.title = "Projects — " + CONFIG.SITE.HALL_SHORT;
 
     UI.showLoading("projects-container");
-    Promise.all([
-      GoogleAPI.fetchUpcoming(CONFIG.SHEETS.PROJECTS),
-      GoogleAPI.fetchPostsByCategory('Projects')
-    ]).then(([legacyRows, postRows]) => {
-      const legacyHtml = legacyRows.map(row => UI.buildCard(row)).join('');
-      const postHtml   = postRows.map(row => UI.buildPostCard(row)).join('');
-      const combined   = legacyHtml + postHtml;
-      const el = document.getElementById('projects-container');
-      el.innerHTML = combined || '<p class="empty-msg">No active project updates.</p>';
-    }).catch(e => UI.showError("projects-container", e.message));
+    GoogleAPI.fetchPostsByCategory('Projects')
+      .then(rows => {
+        const el = document.getElementById('projects-container');
+        el.innerHTML = rows.map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No active project updates.</p>';
+      })
+      .catch(e => UI.showError("projects-container", e.message));
 
     UI.showLoading("drive-container");
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.PROJECTS)

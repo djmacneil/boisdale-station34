@@ -51,9 +51,12 @@
     document.title = "Fire Department — " + CONFIG.SITE.HALL_SHORT;
 
     UI.showLoading("firedept-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
-      .then(rows => UI.renderCards("firedept-container", rows, { emptyMessage: "No fire department notices at this time." }))
-      .catch(e  => UI.showError("firedept-container", e.message));
+    GoogleAPI.fetchPostsByCategory('FireDept')
+      .then(rows => {
+        const el = document.getElementById('firedept-container');
+        el.innerHTML = rows.map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No fire department notices at this time.</p>';
+      })
+      .catch(e => UI.showError("firedept-container", e.message));
 
     UI.showLoading("minutes-container");
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.MINUTES)

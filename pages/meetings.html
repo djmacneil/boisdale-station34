@@ -45,9 +45,12 @@
   <script>
     document.title = "Fire Dept. Notices — " + CONFIG.SITE.HALL_SHORT;
     UI.showLoading("meetings-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
-      .then(rows => UI.renderCards("meetings-container", rows, { emptyMessage: "No meeting notices at this time." }))
-      .catch(e   => UI.showError("meetings-container", e.message));
+    GoogleAPI.fetchPostsByCategory('FireDept')
+      .then(rows => {
+        const el = document.getElementById('meetings-container');
+        el.innerHTML = rows.map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No fire department notices at this time.</p>';
+      })
+      .catch(e => UI.showError("meetings-container", e.message));
     GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(() => {});
   </script>
 </body>

@@ -50,10 +50,6 @@
 
       <br>
 
-      <h2 class="page-title"><i data-lucide="megaphone" class="section-icon"></i>Recent Posts</h2>
-      <div id="posts-container"></div>
-      <br>
-
       <h2 class="page-title"><i data-lucide="siren" class="section-icon"></i><a href="pages/firedept.html">Fire Department</a></h2>
       <div id="meetings-container" class="card-grid"></div>
       <p style="margin-top:1rem;font-family:var(--font-ui);font-size:.9rem;">
@@ -97,12 +93,12 @@
   <script src="js/google-api.js"></script>
   <script src="js/ui.js"></script>
   <script>
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.NOTICES)
+    GoogleAPI.fetchPostsByCategory('Notice')
       .then(rows => {
         if (rows.length === 0) return;
         const ticker = document.getElementById("notices-ticker");
         const inner  = document.getElementById("notices-container");
-        inner.textContent = rows.map(r => r.body ? `-= ${r.title}: ${r.body} =-` : `-= ${r.title} =-`).join("     ✦     ");
+        inner.textContent = rows.map(r => r[4] ? `-= ${r[3]}: ${r[4]} =-` : `-= ${r[3]} =-`).join("     ✦     ");
         ticker.style.display = "flex";
       })
       .catch(e => console.warn("Could not load notices:", e.message));
@@ -112,29 +108,29 @@
       .then(events => UI.renderEventsTable("events-container", events))
       .catch(e => UI.showError("events-container", "Could not load events. " + e.message));
 
-    GoogleAPI.fetchPostsByCategory(null)
-      .then(rows => {
-        const el = document.getElementById('posts-container');
-        if (!rows.length) { el.style.display = 'none'; return; }
-        el.className = 'card-grid';
-        el.innerHTML = rows.slice(0, 4).map(row => UI.buildPostCard(row)).join('');
-      })
-      .catch(() => document.getElementById('posts-container').style.display = 'none');
-
     UI.showLoading("meetings-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.MEETINGS)
-      .then(rows => UI.renderCards("meetings-container", rows, { emptyMessage: "No meeting notices at this time." }))
-      .catch(e  => UI.showError("meetings-container", "Could not load meeting notices. " + e.message));
+    GoogleAPI.fetchPostsByCategory('FireDept')
+      .then(rows => {
+        const el = document.getElementById('meetings-container');
+        el.innerHTML = rows.slice(0, 4).map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No fire department notices at this time.</p>';
+      })
+      .catch(e => UI.showError("meetings-container", e.message));
 
     UI.showLoading("community-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.COMMUNITY)
-      .then(rows => UI.renderCards("community-container", rows.slice(0, 4), { emptyMessage: "No community notices at this time." }))
-      .catch(e  => UI.showError("community-container", "Could not load community notices. " + e.message));
+    GoogleAPI.fetchPostsByCategory('Community')
+      .then(rows => {
+        const el = document.getElementById('community-container');
+        el.innerHTML = rows.slice(0, 4).map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No community notices at this time.</p>';
+      })
+      .catch(e => UI.showError("community-container", e.message));
 
     UI.showLoading("projects-container");
-    GoogleAPI.fetchFiltered(CONFIG.SHEETS.PROJECTS)
-      .then(rows => UI.renderCards("projects-container", rows.slice(0, 4), { emptyMessage: "No project updates." }))
-      .catch(e  => UI.showError("projects-container", "Could not load projects. " + e.message));
+    GoogleAPI.fetchPostsByCategory('Projects')
+      .then(rows => {
+        const el = document.getElementById('projects-container');
+        el.innerHTML = rows.slice(0, 4).map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No project updates.</p>';
+      })
+      .catch(e => UI.showError("projects-container", e.message));
 
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.PHOTOS)
       .then(files => {
