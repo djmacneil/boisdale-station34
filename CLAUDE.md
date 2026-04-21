@@ -40,6 +40,15 @@ Page-specific styles go in `css/style.css` with a clear section comment, not in 
 Short imperative subject line. Co-author line always included:
 `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
+## Lessons Learned
+- Wrong Apps Script URL is always the first thing to check when writes fail.
+- Never click "New deployment" — always update an existing deployment with a new version.
+- Every `doPost` action block needs `return output;` or it falls through to create.
+- Don't name functions the same as DOM APIs (`createEvent`, etc.).
+- Drive image URLs must use `thumbnail?id=...&sz=w800` — `uc?export=view` is blocked.
+- Add `https://www.googleapis.com/auth/calendar` scope before using CalendarApp writes.
+- Confirm deployment is live by visiting the URL and checking the version string in doGet.
+
 ## File Map (quick reference)
 - Config: `js/config.js`
 - API layer: `js/google-api.js`
