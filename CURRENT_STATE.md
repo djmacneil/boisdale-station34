@@ -75,15 +75,28 @@ Returns `{ status: 'ok', service: 'BS34 Post Endpoint', version: 'vN' }` — use
 - **Read** (public site): Google Sheets API key in `CONFIG.GOOGLE_API_KEY`. The spreadsheet must be shared as "Anyone with the link can view".
 - **Write** (upload/manage): Shared token stored in `localStorage` under key `bs34_post_token`. Token is validated server-side in Apps Script (`SHARED_TOKEN` constant).
 
+## Admin Pages
+| Page | Purpose |
+|------|---------|
+| `upload.html` | Create new posts. Redirects to manage.html on success. |
+| `manage.html` | Edit and delete existing posts. Links to upload.html for new posts. |
+| `events-manage.html` | Create, edit, and delete Google Calendar events. |
+
 ## Known Working
 - Creating posts with text and image/PDF attachments via upload.html
-- Deleting posts via manage.html
-- Editing posts via manage.html (pending Apps Script deploy of edit action)
+- Deleting and editing posts via manage.html
+- Creating, editing, and deleting calendar events via events-manage.html
 - Home page two-column layout
 - Calendar event display (compact list format)
 - Drive image thumbnails rendering correctly
 - Start/end date visibility filtering
 
+## Apps Script Deployment
+- **Active URL:** stored in `CONFIG.APPS_SCRIPT_URL` in js/config.js
+- **Current version:** v9 (confirmed)
+- **doPost actions:** `delete`, `edit`, `cal-create`, `cal-edit`, `cal-delete`, `create` (default)
+- **Required OAuth scopes** (in appsscript.json): `spreadsheets`, `drive`, `calendar`, `script.external_request`
+- History: three different deployment URLs accumulated over time. Old deployments should be deleted from Apps Script "Manage deployments" to prevent future confusion.
+
 ## Pending / Known Issues
-- The Apps Script `action: 'edit'` has been provided in code but the user should verify it is deployed and working.
-- The spreadsheet's Posts tab needs to be verified as publicly shared ("Anyone with the link can view") — there have been intermittent 403/404 errors when fetching the Posts tab via the Sheets API, possibly due to API key HTTP referrer restrictions.
+- None known at this time.

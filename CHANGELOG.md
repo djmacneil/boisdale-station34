@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-04-20 (session 2)
+
+### New Features
+- **events-manage.html** — new token-gated admin page for creating, editing, and deleting Google Calendar events. Actions post to Apps Script with `cal-create`, `cal-edit`, `cal-delete` actions.
+
+### Bug Fixes
+- Fixed `CONFIG.APPS_SCRIPT_URL` in config.js — it was pointing to a stale old deployment again (third distinct URL found). Removed dead `FORMS_ENDPOINT` alias that was causing confusion.
+- Fixed `cal-edit` and `cal-delete` returning "Missing field: category" — the doPost in Apps Script was missing `return output;` after the cal-edit block, causing fall-through to the default create path.
+- Fixed "TypeError: Not enough arguments" when creating calendar events — `createEvent` is a reserved DOM method name (`document.createEvent()`). Renamed to `submitNewEvent()`.
+- Fixed new event panel staying open after successful create — added `toggleNewForm()` call in the success path.
+- Fixed upload.html staying on page after posting — now redirects to manage.html after 1.5 seconds.
+
+### Apps Script (Code.gs) — manual changes required by user
+- Added `cal-create`, `cal-edit`, `cal-delete` action handlers to `doPost`.
+- Added `https://www.googleapis.com/auth/calendar` to `oauthScopes` in `appsscript.json` to allow CalendarApp write access.
+- Each action block must have an explicit `return output;` — fall-through to the create path causes "Missing field: category".
+
 ## 2026-04-20
 
 ### Architecture

@@ -11,7 +11,15 @@ Static community website for Boisdale Fire Station 34, Nova Scotia. Hosted on Gi
 All content lives in the **Posts tab** of the Google Sheet. Do not re-introduce individual category tabs (Notices, FireDept, Community, Projects) as content sources. The website stopped reading those tabs intentionally. If asked to add a new content category, add a new category value to the `<select>` in upload.html and filter by it in `fetchPostsByCategory`.
 
 ### Apps Script Deployment Caution
-The project has historically had problems with multiple Apps Script deployments accumulating and the wrong URL being used. `CONFIG.APPS_SCRIPT_URL` in config.js is the authoritative URL. When the user says they redeployed, always verify the URL matches before assuming the new code is live. The correct URL is in config.js. Ask the user to visit the URL directly in a browser to confirm doGet returns the expected response.
+The project has a recurring problem with multiple Apps Script deployments accumulating and the wrong URL being used. Three different URLs have been in use at various points. Rules:
+- `CONFIG.APPS_SCRIPT_URL` in config.js is the **only** authoritative URL. All pages use this.
+- Never use "New deployment" — always "Manage deployments → pencil → New version → Deploy".
+- When the user says they redeployed, always verify by asking them to visit the URL in a browser and confirm doGet returns the expected version string.
+- If "Missing field: category" appears for a calendar action, first suspect the wrong deployment URL before debugging code — it's been the root cause repeatedly.
+- The `doPost` function must have an explicit `return output;` at the end of every action block. Missing a return causes fall-through to the default create path, which throws "Missing field: category".
+
+### Avoid DOM API Name Collisions
+Do not name global JavaScript functions the same as browser DOM APIs. Known collision in this project: `createEvent` conflicts with `document.createEvent()`. Inline `onclick` handlers resolve names through the element/document scope chain before reaching `window`, so DOM methods shadow global functions silently. Use descriptive prefixes like `submitNewEvent`, `handleCreate`, etc.
 
 ### Drive Image URLs
 Always use `https://drive.google.com/thumbnail?id=FILE_ID&sz=w800` for inline images. Never use `uc?export=view` — Google frequently blocks it. The thumbnail format is confirmed working for header images, slideshow photos, and post attachments.
@@ -37,7 +45,7 @@ Short imperative subject line. Co-author line always included:
 - API layer: `js/google-api.js`
 - UI helpers: `js/ui.js`
 - Styles: `css/style.css`
-- Public admin: `upload.html`, `manage.html` (root level, not in pages/)
+- Public admin: `upload.html`, `manage.html`, `events-manage.html` (root level, not in pages/)
 - Content pages: `pages/*.html`
 
 ## Google Sheet Structure
