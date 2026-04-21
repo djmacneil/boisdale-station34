@@ -464,8 +464,9 @@
         });
         const json = await res.json();
         if (json.status === 'ok') {
-          showStatus('✅ Notice posted successfully!', 'success');
+          showStatus('✅ Notice posted successfully! Returning to Manage…', 'success');
           clearForm();
+          setTimeout(() => { window.location.href = 'manage.html'; }, 1500);
         } else {
           showStatus('Error: ' + json.message, 'error');
         }
