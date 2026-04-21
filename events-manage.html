@@ -436,6 +436,7 @@
       if (result.status === 'ok') {
         setStatus('n-status', '✅ Event created!', 'success');
         clearNewForm();
+        toggleNewForm();
         setTimeout(() => loadEvents(), 1000);
       } else {
         setStatus('n-status', 'Error: ' + result.message, 'error');
