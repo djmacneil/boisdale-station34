@@ -55,7 +55,7 @@ const CONFIG = {
     HALL_NAME:  "Boisdale Fire Station 34",
     HALL_SHORT: "Boisdale VFD",
     ADDRESS:    "3810 Grand Narrows Highway, Boisdale, Nova Scotia",
-    PHONE:      "(902) 555-0100",
+    PHONE:      "902-871-2482",
     EMAIL:      "boisdalevfd@gmail.com",
     // Colors (CSS hex)
     COLOR_PRIMARY: "#1a5c2a",   // dark green
