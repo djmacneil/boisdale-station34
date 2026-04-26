@@ -208,6 +208,36 @@
       margin-top: .25rem;
     }
     .empty-msg { color: #888; font-style: italic; padding: 1rem 0; }
+
+    /* Category + status grouping */
+    .cat-group { margin-bottom: 2rem; }
+    .cat-group-header {
+      font-family: var(--font-ui, sans-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary, #1a5c2a);
+      padding: .4rem .9rem;
+      border-radius: 5px;
+      margin-bottom: .75rem;
+      letter-spacing: .03em;
+    }
+    .status-group { margin-bottom: 1rem; padding-left: .75rem; border-left: 3px solid #eee; }
+    .status-group-header {
+      font-family: var(--font-ui, sans-serif);
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: .4rem;
+      padding: .15rem 0;
+    }
+    .status-active   { color: #1a7a3a; border-left-color: #1a7a3a; }
+    .status-future   { color: #1a4abf; }
+    .status-expired  { color: #888; }
+    .status-group.active-group  { border-left-color: #a8d5b5; }
+    .status-group.future-group  { border-left-color: #aac4f8; }
+    .status-group.expired-group { border-left-color: #ddd; }
   </style>
 </head>
 <body class="page-wrap">
@@ -309,6 +339,17 @@
       }
     }
 
+    // ── Classify post by date status ──────────────────────────────────────────
+    function classifyPost(row) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDate = row[8] ? new Date(row[8] + 'T00:00:00') : null;
+      const endDate   = row[9] ? new Date(row[9] + 'T00:00:00') : null;
+      if (endDate && endDate < today) return 'Expired';
+      if (startDate && startDate > today) return 'Future';
+      return 'Active';
+    }
+
     // ── Render list ───────────────────────────────────────────────────────────
     function renderList() {
       const container = document.getElementById('posts-list');
@@ -317,26 +358,52 @@
         return;
       }
 
-      container.innerHTML = posts.map((p, idx) => {
-        const cat   = esc(p.row[2] || '—');
-        const date  = p.row[1] || '';
-        const title = esc(p.row[3] || 'Untitled');
-        return `
-          <div class="post-item" id="item-${idx}">
-            <div class="post-row" id="row-${idx}">
-              <div class="post-row-badge"><span class="badge">${cat}</span></div>
-              <div class="post-row-date">${date}</div>
-              <div class="post-row-title" title="${title}">${title}</div>
-              <div class="post-row-actions">
-                <button class="btn-edit" id="editbtn-${idx}" onclick="toggleEdit(${idx})">Edit</button>
-                <button class="btn-del" onclick="deletePost(${idx})">Delete</button>
-              </div>
-            </div>
-            <div class="edit-panel" id="edit-${idx}">
-              ${buildEditForm(idx, p)}
-            </div>
-          </div>`;
-      }).join('');
+      const categories = ['Notice', 'FireDept', 'Community', 'Projects'];
+      const catLabels  = { Notice: 'Notice', FireDept: 'Fire Dept', Community: 'Community', Projects: 'Project Updates' };
+      const statuses   = ['Active', 'Future', 'Expired'];
+
+      let html = '';
+
+      categories.forEach(cat => {
+        const catPosts = posts.filter(p => (p.row[2] || '').trim() === cat);
+        if (!catPosts.length) return;
+
+        html += `<div class="cat-group"><div class="cat-group-header">${catLabels[cat]}</div>`;
+
+        statuses.forEach(status => {
+          const group = catPosts.filter(p => classifyPost(p.row) === status);
+          if (!group.length) return;
+
+          html += `<div class="status-group ${status.toLowerCase()}-group">
+            <div class="status-group-header status-${status.toLowerCase()}">${status}</div>`;
+
+          group.forEach(p => {
+            const idx   = posts.indexOf(p);
+            const date  = p.row[1] || '';
+            const title = esc(p.row[3] || 'Untitled');
+            html += `
+              <div class="post-item" id="item-${idx}">
+                <div class="post-row" id="row-${idx}">
+                  <div class="post-row-date">${date}</div>
+                  <div class="post-row-title" title="${title}">${title}</div>
+                  <div class="post-row-actions">
+                    <button class="btn-edit" id="editbtn-${idx}" onclick="toggleEdit(${idx})">Edit</button>
+                    <button class="btn-del" onclick="deletePost(${idx})">Delete</button>
+                  </div>
+                </div>
+                <div class="edit-panel" id="edit-${idx}">
+                  ${buildEditForm(idx, p)}
+                </div>
+              </div>`;
+          });
+
+          html += `</div>`; // status-group
+        });
+
+        html += `</div>`; // cat-group
+      });
+
+      container.innerHTML = html || '<p class="empty-msg">No posts found.</p>';
     }
 
     // ── Edit form ─────────────────────────────────────────────────────────────
