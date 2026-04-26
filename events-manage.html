@@ -82,19 +82,88 @@
     .ev-form-grid input[type="text"],
     .ev-form-grid input[type="date"],
     .ev-form-grid input[type="time"],
+    .ev-form-grid input[type="number"],
+    .ev-form-grid select,
     .ev-form-grid textarea {
       width: 100%; padding: .5rem .65rem;
       border: 1px solid #ccc; border-radius: 4px;
       font-size: .95rem; font-family: inherit; box-sizing: border-box;
     }
     .ev-form-grid textarea { min-height: 80px; resize: vertical; }
-    .allday-row {
+    .allday-row, .repeat-row {
       display: flex; align-items: center; gap: .5rem;
       font-size: .9rem; font-family: var(--font-ui);
     }
-    .allday-row input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; }
+    .allday-row input[type="checkbox"],
+    .repeat-row input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; }
     .time-field { transition: opacity .15s; }
     .time-field.hidden { opacity: .3; pointer-events: none; }
+
+    /* Recurrence section */
+    .repeat-section {
+      display: none;
+      background: #eaf2ff;
+      border: 1px solid #b3d4f5;
+      border-radius: 5px;
+      padding: .85rem 1rem;
+      margin-top: .25rem;
+    }
+    .repeat-section.open { display: block; }
+    .repeat-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem .9rem;
+    }
+    @media (max-width: 540px) { .repeat-inner { grid-template-columns: 1fr; } }
+    .repeat-inner label {
+      font-size: .82rem; font-weight: 600; color: #333; margin-bottom: .2rem;
+    }
+    .repeat-inner select,
+    .repeat-inner input[type="date"],
+    .repeat-inner input[type="number"] {
+      width: 100%; padding: .4rem .55rem;
+      border: 1px solid #ccc; border-radius: 4px;
+      font-size: .9rem; font-family: inherit; box-sizing: border-box;
+    }
+    .weekday-picker {
+      display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .25rem;
+    }
+    .weekday-picker label {
+      display: flex; align-items: center; gap: .25rem;
+      font-size: .8rem; font-weight: 400; color: #333;
+      background: #fff; border: 1px solid #ccc; border-radius: 3px;
+      padding: .2rem .45rem; cursor: pointer; user-select: none;
+    }
+    .weekday-picker label:has(input:checked) {
+      background: #1a5c2a; color: #fff; border-color: #1a5c2a;
+    }
+    .weekday-picker input[type="checkbox"] {
+      display: none;
+    }
+    .repeat-note {
+      font-size: .78rem; color: #666; margin-top: .5rem; font-style: italic;
+      grid-column: 1 / -1;
+    }
+
+    /* Scope choice for recurring events */
+    .scope-choice {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 5px;
+      padding: .75rem 1rem;
+      margin-bottom: .85rem;
+      font-size: .88rem;
+      font-family: var(--font-ui);
+    }
+    .scope-choice strong { display: block; margin-bottom: .4rem; color: #5a3e00; }
+    .scope-choice label {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .2rem 0; cursor: pointer; color: #333;
+    }
+    .scope-choice label input { margin: 0; }
+    .series-only-note {
+      font-size: .78rem; color: #888; font-style: italic; margin-top: .5rem;
+    }
 
     .form-actions {
       display: flex; gap: .5rem; margin-top: 1rem; align-items: center;
@@ -133,6 +202,14 @@
       flex: 1; font-weight: 600; color: #222;
       min-width: 0; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
+    }
+    .ev-item-title .recurring-badge {
+      display: inline-block;
+      font-size: .7rem; font-weight: 700; font-family: var(--font-ui);
+      background: #e8f0fe; color: #1a4abf; border: 1px solid #aac4f8;
+      border-radius: 3px; padding: .1rem .35rem;
+      margin-left: .4rem; vertical-align: middle;
+      white-space: nowrap;
     }
     .ev-item-actions { display: flex; gap: .4rem; flex-shrink: 0; }
     .btn-edit {
@@ -223,6 +300,55 @@
             <label>Location <span style="font-weight:400;color:#999;">(optional)</span></label>
             <input type="text" id="n-location" placeholder="Address or place name">
           </div>
+
+          <!-- Recurrence -->
+          <div class="span2">
+            <div class="repeat-row">
+              <input type="checkbox" id="n-repeat" onchange="toggleRepeat('n')">
+              <label for="n-repeat" style="font-weight:400;margin:0;">Repeat</label>
+            </div>
+            <div class="repeat-section" id="n-repeat-section">
+              <div class="repeat-inner">
+                <div>
+                  <label>Frequency</label>
+                  <select id="n-freq" onchange="toggleWeekdays('n')">
+                    <option value="DAILY">Daily</option>
+                    <option value="WEEKLY" selected>Weekly</option>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="YEARLY">Yearly</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Ends</label>
+                  <select id="n-end-type" onchange="toggleEndType('n')">
+                    <option value="never">Never</option>
+                    <option value="count">After N times</option>
+                    <option value="date">On date</option>
+                  </select>
+                </div>
+                <div id="n-weekdays-wrap" class="span2" style="grid-column:1/-1;">
+                  <label>Repeat on</label>
+                  <div class="weekday-picker">
+                    <label><input type="checkbox" name="n-wd" value="MO"> Mon</label>
+                    <label><input type="checkbox" name="n-wd" value="TU"> Tue</label>
+                    <label><input type="checkbox" name="n-wd" value="WE"> Wed</label>
+                    <label><input type="checkbox" name="n-wd" value="TH"> Thu</label>
+                    <label><input type="checkbox" name="n-wd" value="FR"> Fri</label>
+                    <label><input type="checkbox" name="n-wd" value="SA"> Sat</label>
+                    <label><input type="checkbox" name="n-wd" value="SU"> Sun</label>
+                  </div>
+                </div>
+                <div id="n-end-count-wrap" style="display:none;">
+                  <label>Occurrences</label>
+                  <input type="number" id="n-end-count" value="10" min="1" max="365">
+                </div>
+                <div id="n-end-date-wrap" style="display:none;">
+                  <label>End by date</label>
+                  <input type="date" id="n-end-recur-date">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="form-actions">
           <button class="btn-save" onclick="submitNewEvent()">Create Event</button>
@@ -270,9 +396,8 @@
     function getToken() { return tokenInput.value.trim(); }
 
     // ── State ─────────────────────────────────────────────────────────────────
-    let events = []; // raw Calendar API event objects
+    let events = [];
 
-    // Default new-event date to today
     document.getElementById('n-start-date').value = today();
     document.getElementById('n-end-date').value   = today();
 
@@ -300,13 +425,15 @@
         return;
       }
       container.innerHTML = events.map((ev, idx) => {
-        const when  = fmtWhen(ev);
-        const title = esc(ev.summary || 'Untitled');
+        const when      = fmtWhen(ev);
+        const title     = esc(ev.summary || 'Untitled');
+        const isRecurring = !!ev.recurringEventId;
+        const recurBadge  = isRecurring ? '<span class="recurring-badge">↻ Recurring</span>' : '';
         return `
           <div class="ev-item-row" id="evrow-${idx}">
             <div class="ev-item-header">
               <div class="ev-item-when">${when}</div>
-              <div class="ev-item-title" title="${title}">${title}</div>
+              <div class="ev-item-title" title="${title}">${title}${recurBadge}</div>
               <div class="ev-item-actions">
                 <button class="btn-edit" id="evbtn-${idx}" onclick="toggleEdit(${idx})">Edit</button>
                 <button class="btn-del" onclick="deleteEvent(${idx})">Delete</button>
@@ -321,43 +448,53 @@
 
     // ── Build edit form ───────────────────────────────────────────────────────
     function buildEditForm(idx, ev) {
-      const isAllDay   = !!ev.start.date;
-      const startDate  = isAllDay ? ev.start.date : ev.start.dateTime.slice(0, 10);
-      const endDate    = isAllDay
-        ? offsetDate(ev.end.date, -1)   // Calendar API end date is exclusive
-        : ev.end.dateTime.slice(0, 10);
-      const startTime  = isAllDay ? '09:00' : ev.start.dateTime.slice(11, 16);
-      const endTime    = isAllDay ? '10:00' : ev.end.dateTime.slice(11, 16);
-      const desc       = esc(ev.description || '');
-      const loc        = esc(ev.location || '');
-      const title      = esc(ev.summary || '');
-      const allDayChk  = isAllDay ? 'checked' : '';
+      const isAllDay    = !!ev.start.date;
+      const isRecurring = !!ev.recurringEventId;
+      const startDate   = isAllDay ? ev.start.date : ev.start.dateTime.slice(0, 10);
+      const endDate     = isAllDay ? offsetDate(ev.end.date, -1) : ev.end.dateTime.slice(0, 10);
+      const startTime   = isAllDay ? '09:00' : ev.start.dateTime.slice(11, 16);
+      const endTime     = isAllDay ? '10:00' : ev.end.dateTime.slice(11, 16);
+      const desc        = esc(ev.description || '');
+      const loc         = esc(ev.location || '');
+      const title       = esc(ev.summary || '');
+      const allDayChk   = isAllDay ? 'checked' : '';
+
+      const scopeHtml = isRecurring ? `
+        <div class="scope-choice">
+          <strong>This is a recurring event — what would you like to edit?</strong>
+          <label><input type="radio" name="escope-${idx}" value="instance" checked> This occurrence only</label>
+          <label><input type="radio" name="escope-${idx}" value="series" onchange="toggleSeriesEdit(${idx}, true)"> Entire series (title, description, location only)</label>
+          <div class="series-only-note">Note: to change the time or recurrence pattern of a series, delete and recreate the event.</div>
+        </div>` : '';
+
+      const timeHidden = isAllDay ? 'hidden' : '';
 
       return `
+        ${scopeHtml}
         <div class="ev-form-grid">
           <div class="span2">
             <label>Title</label>
             <input type="text" id="et-${idx}" value="${title}">
           </div>
-          <div class="span2">
+          <div class="span2" id="eallday-wrap-${idx}">
             <div class="allday-row">
               <input type="checkbox" id="ea-${idx}" ${allDayChk} onchange="toggleTime('e${idx}')">
               <label for="ea-${idx}" style="font-weight:400;margin:0;">All day event</label>
             </div>
           </div>
-          <div>
+          <div id="edate-wrap-${idx}">
             <label>Start Date</label>
             <input type="date" id="esd-${idx}" value="${startDate}">
           </div>
-          <div class="time-field ${isAllDay ? 'hidden' : ''}" id="e${idx}-start-time-wrap">
+          <div class="time-field ${timeHidden}" id="e${idx}-start-time-wrap">
             <label>Start Time</label>
             <input type="time" id="est-${idx}" value="${startTime}">
           </div>
-          <div>
+          <div id="eenddate-wrap-${idx}">
             <label>End Date <span style="font-weight:400;color:#999;">(optional)</span></label>
             <input type="date" id="eed-${idx}" value="${endDate}">
           </div>
-          <div class="time-field ${isAllDay ? 'hidden' : ''}" id="e${idx}-end-time-wrap">
+          <div class="time-field ${timeHidden}" id="e${idx}-end-time-wrap">
             <label>End Time</label>
             <input type="time" id="eet-${idx}" value="${endTime}">
           </div>
@@ -377,6 +514,16 @@
         </div>`;
     }
 
+    // Hide time/date fields when editing a full series (time changes not supported)
+    function toggleSeriesEdit(idx, isSeries) {
+      const timeFields = [`e${idx}-start-time-wrap`, `e${idx}-end-time-wrap`,
+                          `edate-wrap-${idx}`, `eenddate-wrap-${idx}`, `eallday-wrap-${idx}`];
+      timeFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.opacity = isSeries ? '.35' : '1';
+      });
+    }
+
     // ── Toggle new event form ─────────────────────────────────────────────────
     function toggleNewForm() {
       const panel = document.getElementById('new-panel');
@@ -385,11 +532,37 @@
 
     // ── Toggle time fields ────────────────────────────────────────────────────
     function toggleTime(prefix) {
-      const allDay = document.getElementById(prefix === 'n' ? 'n-allday' : `ea-${prefix.slice(1)}`).checked;
+      const isNew  = prefix === 'n';
+      const allDay = isNew
+        ? document.getElementById('n-allday').checked
+        : document.getElementById(`ea-${prefix.slice(1)}`).checked;
       const startWrap = document.getElementById(prefix + '-start-time-wrap');
       const endWrap   = document.getElementById(prefix + '-end-time-wrap');
       if (startWrap) startWrap.classList.toggle('hidden', allDay);
       if (endWrap)   endWrap.classList.toggle('hidden', allDay);
+    }
+
+    // ── Toggle repeat section ─────────────────────────────────────────────────
+    function toggleRepeat(prefix) {
+      const checked = document.getElementById(`${prefix}-repeat`).checked;
+      const section = document.getElementById(`${prefix}-repeat-section`);
+      section.classList.toggle('open', checked);
+    }
+
+    // ── Toggle weekday picker visibility ──────────────────────────────────────
+    function toggleWeekdays(prefix) {
+      const freq = document.getElementById(`${prefix}-freq`).value;
+      const wrap = document.getElementById(`${prefix}-weekdays-wrap`);
+      if (wrap) wrap.style.display = freq === 'WEEKLY' ? '' : 'none';
+    }
+
+    // ── Toggle end-type fields ────────────────────────────────────────────────
+    function toggleEndType(prefix) {
+      const type = document.getElementById(`${prefix}-end-type`).value;
+      const countWrap = document.getElementById(`${prefix}-end-count-wrap`);
+      const dateWrap  = document.getElementById(`${prefix}-end-date-wrap`);
+      if (countWrap) countWrap.style.display = type === 'count' ? '' : 'none';
+      if (dateWrap)  dateWrap.style.display  = type === 'date'  ? '' : 'none';
     }
 
     // ── Toggle edit panel ─────────────────────────────────────────────────────
@@ -408,6 +581,27 @@
       }
     }
 
+    // ── Build recurrence payload ──────────────────────────────────────────────
+    function buildRecurrencePayload(prefix) {
+      const repeat = document.getElementById(`${prefix}-repeat`);
+      if (!repeat || !repeat.checked) return null;
+
+      const freq    = document.getElementById(`${prefix}-freq`).value;
+      const endType = document.getElementById(`${prefix}-end-type`).value;
+      const rec     = { freq, end_type: endType };
+
+      if (freq === 'WEEKLY') {
+        rec.days = Array.from(document.querySelectorAll(`input[name="${prefix}-wd"]:checked`))
+          .map(cb => cb.value);
+      }
+      if (endType === 'count') {
+        rec.end_count = document.getElementById(`${prefix}-end-count`).value;
+      } else if (endType === 'date') {
+        rec.end_date = document.getElementById(`${prefix}-end-recur-date`).value;
+      }
+      return rec;
+    }
+
     // ── Create event ──────────────────────────────────────────────────────────
     async function submitNewEvent() {
       const token = getToken();
@@ -415,6 +609,8 @@
       localStorage.setItem('bs34_post_token', token);
 
       const allDay = document.getElementById('n-allday').checked;
+      const recurrence = buildRecurrencePayload('n');
+
       const payload = {
         action:      'cal-create',
         token,
@@ -427,6 +623,7 @@
         description: document.getElementById('n-description').value.trim(),
         location:    document.getElementById('n-location').value.trim(),
       };
+      if (recurrence) payload.recurrence = recurrence;
 
       if (!payload.title)      { setStatus('n-status', 'Title is required.', 'error'); return; }
       if (!payload.start_date) { setStatus('n-status', 'Start date is required.', 'error'); return; }
@@ -452,6 +649,8 @@
       document.getElementById('n-description').value = '';
       document.getElementById('n-location').value    = '';
       document.getElementById('n-allday').checked    = false;
+      document.getElementById('n-repeat').checked    = false;
+      document.getElementById('n-repeat-section').classList.remove('open');
       toggleTime('n');
     }
 
@@ -460,20 +659,30 @@
       const token = getToken();
       if (!token) { setStatus(`epanel-status-${idx}`, 'Please enter your token.', 'error'); return; }
 
-      const allDay = document.getElementById(`ea-${idx}`).checked;
+      const ev         = events[idx];
+      const isRecurring = !!ev.recurringEventId;
+      const scopeEl    = document.querySelector(`input[name="escope-${idx}"]:checked`);
+      const editScope  = scopeEl ? scopeEl.value : 'instance';
+      const allDay     = document.getElementById(`ea-${idx}`).checked;
+
       const payload = {
         action:      'cal-edit',
         token,
-        event_id:    events[idx].id,
+        event_id:    ev.id,
+        edit_scope:  editScope,
         title:       document.getElementById(`et-${idx}`).value.trim(),
-        start_date:  document.getElementById(`esd-${idx}`).value,
-        end_date:    document.getElementById(`eed-${idx}`).value,
-        start_time:  allDay ? '' : document.getElementById(`est-${idx}`).value,
-        end_time:    allDay ? '' : document.getElementById(`eet-${idx}`).value,
-        all_day:     allDay,
         description: document.getElementById(`edesc-${idx}`).value.trim(),
         location:    document.getElementById(`eloc-${idx}`).value.trim(),
       };
+
+      // Only send time fields for instance edits
+      if (editScope === 'instance') {
+        payload.start_date = document.getElementById(`esd-${idx}`).value;
+        payload.end_date   = document.getElementById(`eed-${idx}`).value;
+        payload.start_time = allDay ? '' : document.getElementById(`est-${idx}`).value;
+        payload.end_time   = allDay ? '' : document.getElementById(`eet-${idx}`).value;
+        payload.all_day    = allDay;
+      }
 
       setStatus(`epanel-status-${idx}`, 'Saving…', 'loading');
       const result = await callScript(payload);
@@ -487,13 +696,26 @@
 
     // ── Delete event ──────────────────────────────────────────────────────────
     async function deleteEvent(idx) {
-      const ev = events[idx];
-      if (!confirm(`Delete "${ev.summary || 'this event'}"?\n\nThis cannot be undone.`)) return;
+      const ev          = events[idx];
+      const isRecurring = !!ev.recurringEventId;
+      const title       = ev.summary || 'this event';
+
+      let deleteScope = 'instance';
+      if (isRecurring) {
+        const choice = window.confirm(
+          `"${title}" is a recurring event.\n\nClick OK to delete the ENTIRE series.\nClick Cancel to delete only this occurrence.`
+        );
+        if (choice === null) return; // dismissed
+        deleteScope = choice ? 'series' : 'instance';
+      } else {
+        if (!confirm(`Delete "${title}"?\n\nThis cannot be undone.`)) return;
+      }
+
       const token = getToken();
       if (!token) { showStatus('Please enter your token.', 'error'); return; }
 
       showStatus('Deleting…', 'loading');
-      const result = await callScript({ action: 'cal-delete', token, event_id: ev.id });
+      const result = await callScript({ action: 'cal-delete', token, event_id: ev.id, delete_scope: deleteScope });
       if (result.status === 'ok') {
         showStatus('Event deleted.', 'success');
         setTimeout(() => loadEvents(), 600);
@@ -505,7 +727,7 @@
     // ── Apps Script call ──────────────────────────────────────────────────────
     async function callScript(payload) {
       try {
-        const res  = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
           method:  'POST',
           headers: { 'Content-Type': 'text/plain' },
           body:    JSON.stringify(payload)
@@ -519,7 +741,6 @@
     // ── Helpers ───────────────────────────────────────────────────────────────
     function fmtWhen(ev) {
       if (ev.start.date) {
-        // All-day
         const d = new Date(ev.start.date + 'T00:00:00');
         return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
       }
@@ -532,7 +753,6 @@
       return new Date().toISOString().slice(0, 10);
     }
 
-    // Calendar API all-day end dates are exclusive (day after); subtract 1 day for display
     function offsetDate(dateStr, days) {
       const d = new Date(dateStr + 'T00:00:00');
       d.setDate(d.getDate() + days);
@@ -542,16 +762,16 @@
     function showStatus(msg, type) {
       const el = document.getElementById('manage-status');
       if (!msg) { el.style.display = 'none'; return; }
-      el.textContent  = msg;
-      el.className    = type;
+      el.textContent   = msg;
+      el.className     = type;
       el.style.display = 'block';
     }
 
     function setStatus(id, msg, type) {
       const el = document.getElementById(id);
       if (!el) return;
-      el.textContent  = msg;
-      el.className    = 'form-status ' + type;
+      el.textContent   = msg;
+      el.className     = 'form-status ' + type;
       el.style.display = 'inline';
     }
 
