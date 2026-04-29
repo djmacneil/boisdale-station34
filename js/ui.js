@@ -206,7 +206,6 @@ const UI = (() => {
       <div class="post-card">
         <div class="post-meta">
           <span class="post-category">${escHtml(category)}</span>
-          <span class="post-date">${formatDate(date)}</span>
         </div>
         <h3 class="post-title">${escHtml(title)}</h3>
         <div class="post-body">${formatBody(body)}</div>
