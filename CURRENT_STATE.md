@@ -79,24 +79,31 @@ Returns `{ status: 'ok', service: 'BS34 Post Endpoint', version: 'vN' }` — use
 | Page | Purpose |
 |------|---------|
 | `upload.html` | Create new posts. Redirects to manage.html on success. |
-| `manage.html` | Edit and delete existing posts. Links to upload.html for new posts. |
-| `events-manage.html` | Create, edit, and delete Google Calendar events. |
+| `manage.html` | Edit and delete existing posts. Grouped by category then Active/Future/Expired. |
+| `events-manage.html` | Create, edit, and delete Google Calendar events including recurring events. |
 
 ## Known Working
 - Creating posts with text and image/PDF attachments via upload.html
-- Deleting and editing posts via manage.html
+- Deleting and editing posts via manage.html (grouped by category + status)
 - Creating, editing, and deleting calendar events via events-manage.html
+- Creating recurring events (daily/weekly/monthly/yearly) with end conditions
+- Editing recurring events: this occurrence or entire series
+- Deleting recurring events: this occurrence or entire series
 - Home page two-column layout
-- Calendar event display (compact list format)
+- Calendar event display (compact list format with green date badges)
 - Drive image thumbnails rendering correctly
 - Start/end date visibility filtering
+- URLs in post body text auto-link on all pages
+
+## Post Card Display
+- Category badge shown; posted date is intentionally hidden
+- Body text HTML-escaped then URLs linkified and newlines converted to `<br>`
 
 ## Apps Script Deployment
 - **Active URL:** stored in `CONFIG.APPS_SCRIPT_URL` in js/config.js
-- **Current version:** v9 (confirmed)
 - **doPost actions:** `delete`, `edit`, `cal-create`, `cal-edit`, `cal-delete`, `create` (default)
 - **Required OAuth scopes** (in appsscript.json): `spreadsheets`, `drive`, `calendar`, `script.external_request`
-- History: three different deployment URLs accumulated over time. Old deployments should be deleted from Apps Script "Manage deployments" to prevent future confusion.
+- Always update via "Manage deployments → pencil → New version" — never "New deployment"
 
 ## Pending / Known Issues
 - None known at this time.

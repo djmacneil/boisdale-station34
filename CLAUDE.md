@@ -40,11 +40,21 @@ Page-specific styles go in `css/style.css` with a clear section comment, not in 
 Short imperative subject line. Co-author line always included:
 `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
+### Post Card Display Convention
+Post cards show the category badge but **not** the posted date — this was intentionally removed. Do not re-add the date unless the user asks. Body text must always go through `formatBody()` (not raw `escHtml()`) to ensure URL auto-linking and newline handling.
+
+### manage.html Post Grouping
+Posts are grouped by category then by Active/Future/Expired status. Classification logic: Expired = endDate < today; Future = startDate > today; Active = everything else. Do not revert to a flat list.
+
+### Recurring Calendar Events
+`fetchCalendarEvents` uses `singleEvents=true`, so recurring event instances come back as individual events each with a `recurringEventId` field. Use this to detect recurring instances in the UI. Apps Script `CalendarApp.newRecurrence()` is used for creating series; `ev.getEventSeries()` for editing/deleting a series. Time changes to an entire series are not supported via CalendarApp — delete and recreate is the workaround.
+
 ## Lessons Learned
 - Wrong Apps Script URL is always the first thing to check when writes fail.
 - Never click "New deployment" — always update an existing deployment with a new version.
 - Every `doPost` action block needs `return output;` or it falls through to create.
-- Don't name functions the same as DOM APIs (`createEvent`, etc.).
+- Don't name functions the same as DOM APIs (`createEvent` → `submitNewEvent`).
+- Always use `formatBody()` for post body text, never raw `escHtml()` alone.
 - Drive image URLs must use `thumbnail?id=...&sz=w800` — `uc?export=view` is blocked.
 - Add `https://www.googleapis.com/auth/calendar` scope before using CalendarApp writes.
 - Confirm deployment is live by visiting the URL and checking the version string in doGet.

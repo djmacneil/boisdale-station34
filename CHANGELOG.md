@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-04-29
+
+### New Features
+- **events-manage.html** — recurring event support: new event form now has a Repeat toggle with frequency (Daily/Weekly/Monthly/Yearly), weekday picker for weekly events, and end condition (never/after N times/on date). Recurring event instances show a "↻ Recurring" badge in the list.
+- **events-manage.html** — editing recurring events offers a scope choice: "This occurrence only" or "Entire series" (series edits restricted to title, description, location). Deleting recurring events prompts for occurrence vs. entire series.
+- **manage.html** — posts now grouped by category (Notice/Fire Dept/Community/Project Updates) then by status (Active/Future/Expired) within each category. Status determined by start/end dates.
+- **ui.js** — post body text now auto-linkifies `http(s)://` URLs via `formatBody()`.
+
+### Appearance
+- Removed posted dates from all post cards.
+- Event date headers in Upcoming Events now display as green pill badges.
+- Divider lines between event day groups strengthened to 2px muted green.
+- Phone number updated to 902-871-2482 across all pages.
+
+### Apps Script (Code.gs) — manual changes required by user
+- `cal-create` block updated to support recurrence via `CalendarApp.newRecurrence()` and `createEventSeries()` / `createAllDayEventSeries()`.
+- `cal-edit` block updated to handle `edit_scope: 'series'` — calls `ev.getEventSeries()` for series edits.
+- `cal-delete` block updated to handle `delete_scope: 'series'` — calls `ev.getEventSeries().deleteEventSeries()`.
+
 ## 2026-04-20 (session 2)
 
 ### New Features
