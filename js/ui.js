@@ -209,7 +209,7 @@ const UI = (() => {
           <span class="post-date">${formatDate(date)}</span>
         </div>
         <h3 class="post-title">${escHtml(title)}</h3>
-        <div class="post-body">${escHtml(body).replace(/\n/g, '<br>')}</div>
+        <div class="post-body">${formatBody(body)}</div>
         ${attachmentHtml}
       </div>`;
   }
