@@ -49,6 +49,9 @@ Posts are grouped by category then by Active/Future/Expired status. Classificati
 ### Recurring Calendar Events
 `fetchCalendarEvents` uses `singleEvents=true`, so recurring event instances come back as individual events each with a `recurringEventId` field. Use this to detect recurring instances in the UI. Apps Script `CalendarApp.newRecurrence()` is used for creating series; `ev.getEventSeries()` for editing/deleting a series. Time changes to an entire series are not supported via CalendarApp — delete and recreate is the workaround.
 
+### Google Analytics
+GA4 tag `G-SKSZ174GDR` is in the `<head>` of every page. When adding new HTML pages, always include the gtag snippet immediately after `<head>`. The tag ID is `G-SKSZ174GDR`.
+
 ## Lessons Learned
 - Wrong Apps Script URL is always the first thing to check when writes fail.
 - Never click "New deployment" — always update an existing deployment with a new version.

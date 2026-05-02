@@ -105,5 +105,8 @@ Returns `{ status: 'ok', service: 'BS34 Post Endpoint', version: 'vN' }` — use
 - **Required OAuth scopes** (in appsscript.json): `spreadsheets`, `drive`, `calendar`, `script.external_request`
 - Always update via "Manage deployments → pencil → New version" — never "New deployment"
 
+## Analytics
+Google Analytics (GA4) tag `G-SKSZ174GDR` is present in the `<head>` of all 12 HTML pages.
+
 ## Pending / Known Issues
 - None known at this time.

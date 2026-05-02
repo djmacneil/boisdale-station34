@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-05-02
+
+### Analytics
+- Added Google Analytics tag (G-SKSZ174GDR) to all 12 HTML pages via gtag.js.
+
 ## 2026-04-29
 
 ### New Features
