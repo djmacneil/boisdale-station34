@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-05-02 (session 2)
+
+### upload.html
+- Post Date field is now read-only — always shows today's date, cannot be edited by the user.
+
 ## 2026-05-02
 
 ### Analytics
