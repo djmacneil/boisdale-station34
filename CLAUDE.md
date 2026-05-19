@@ -49,6 +49,11 @@ Posts are grouped by category then by Active/Future/Expired status. Classificati
 ### Recurring Calendar Events
 `fetchCalendarEvents` uses `singleEvents=true`, so recurring event instances come back as individual events each with a `recurringEventId` field. Use this to detect recurring instances in the UI. Apps Script `CalendarApp.newRecurrence()` is used for creating series; `ev.getEventSeries()` for editing/deleting a series. Time changes to an entire series are not supported via CalendarApp — delete and recreate is the workaround.
 
+Key implementation detail: `addDailyRule()` / `addWeeklyRule()` / `addMonthlyRule()` / `addYearlyRule()` each return a `RecurrenceRule` object. The end condition methods (`times()`, `until()`) and `onlyOnWeekdays()` must be called on that `RecurrenceRule`, not on the parent `EventRecurrence`. Then pass the `EventRecurrence` to `createEventSeries()` / `createAllDayEventSeries()`. Weekday codes from the client (MO/TU/WE/TH/FR/SA/SU) must be mapped to `CalendarApp.Weekday.*` enum values.
+
+### Code.gs Repo Sync
+`appscript/Code.gs` is the canonical source for the Apps Script. Any manual edits made directly in the Google Apps Script editor must be reflected back in Code.gs and committed. When diagnosing calendar bugs, always check Code.gs first — if it's out of date with the live script, the repo is not the source of truth.
+
 ### Google Analytics
 GA4 tag `G-SKSZ174GDR` is in the `<head>` of every page. When adding new HTML pages, always include the gtag snippet immediately after `<head>`. The tag ID is `G-SKSZ174GDR`.
 
@@ -61,6 +66,9 @@ GA4 tag `G-SKSZ174GDR` is in the `<head>` of every page. When adding new HTML pa
 - Drive image URLs must use `thumbnail?id=...&sz=w800` — `uc?export=view` is blocked.
 - Add `https://www.googleapis.com/auth/calendar` scope before using CalendarApp writes.
 - Confirm deployment is live by visiting the URL and checking the version string in doGet.
+- Recurring events require `createEventSeries()` / `createAllDayEventSeries()` — using `createEvent()` silently creates only a single occurrence with no error.
+- `CalendarApp.newRecurrence().addWeeklyRule()` returns a `RecurrenceRule`; call `onlyOnWeekdays()` and `times()` / `until()` on that object, not on the `EventRecurrence`.
+- Keep `appscript/Code.gs` in sync with the live Apps Script. If they diverge, debugging is unreliable.
 
 ## File Map (quick reference)
 - Config: `js/config.js`

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-19
+
+### Bug Fixes
+- **Recurring calendar events** — events created with a repeat pattern were only showing the first occurrence in Google Calendar. Root cause: the live Apps Script `cal-create` handler was not calling `createEventSeries()` / `createAllDayEventSeries()` when a recurrence payload was present (it fell through to `createEvent()` instead). Fixed by rewriting the handler with a `buildRecurrenceRule()` helper that correctly maps the frequency, weekday codes (MO/TU/WE etc. → `CalendarApp.Weekday` enums), and end conditions (`times()` / `until()`) onto the `RecurrenceRule` returned by `addDailyRule()` / `addWeeklyRule()` / etc.
+
+### Appearance
+- **Post image filenames** — removed the filename label (`📷 filename.jpg`) that was displayed below every post image. Images now display without any caption.
+
+### Code.gs
+- Rewrote `appscript/Code.gs` to include the complete calendar handlers (`cal-create`, `cal-edit`, `cal-delete`) alongside the existing post handler. Previously the calendar code existed only in the live Apps Script and was not tracked in the repo.
+- Extracted `buildRecurrenceRule()` and `parseDateTime()` helpers.
+- `doGet` now returns `service: 'BS34 Endpoint v3'` for version verification.
+
 ## 2026-05-02 (session 2)
 
 ### upload.html

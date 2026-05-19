@@ -67,9 +67,12 @@ Deployed as a web app — "Execute as: Me", "Who has access: Anyone".
 | `create` (default) | category, date, title, body, token, optionally fileBase64/fileName/fileType, start_date, end_date | Appends new row to Posts tab, uploads file to Drive |
 | `edit` | token, sheetRow, date, category, title, body, start_date, end_date | Updates existing row (preserves timestamp and file columns) |
 | `delete` | token, sheetRow | Deletes the row |
+| `cal-create` | token, title, start_date, end_date, start_time, end_time, all_day, description, location, recurrence? | Creates a calendar event or recurring series |
+| `cal-edit` | token, event_id, edit_scope (instance\|series), title, description, location, + time fields for instance edits | Edits one occurrence or the entire series |
+| `cal-delete` | token, event_id, delete_scope (instance\|series) | Deletes one occurrence or the entire series |
 
 ### doGet
-Returns `{ status: 'ok', service: 'BS34 Post Endpoint', version: 'vN' }` — used as a health check.
+Returns `{ status: 'ok', service: 'BS34 Endpoint v3' }` — used as a health check. If the string doesn't match after a redeploy, the wrong version is live.
 
 ## Authentication
 - **Read** (public site): Google Sheets API key in `CONFIG.GOOGLE_API_KEY`. The spreadsheet must be shared as "Anyone with the link can view".
@@ -86,7 +89,7 @@ Returns `{ status: 'ok', service: 'BS34 Post Endpoint', version: 'vN' }` — use
 - Creating posts with text and image/PDF attachments via upload.html
 - Deleting and editing posts via manage.html (grouped by category + status)
 - Creating, editing, and deleting calendar events via events-manage.html
-- Creating recurring events (daily/weekly/monthly/yearly) with end conditions
+- Creating recurring events (daily/weekly/monthly/yearly) with end conditions — all occurrences now appear in Google Calendar
 - Editing recurring events: this occurrence or entire series
 - Deleting recurring events: this occurrence or entire series
 - Home page two-column layout
@@ -107,6 +110,9 @@ Returns `{ status: 'ok', service: 'BS34 Post Endpoint', version: 'vN' }` — use
 
 ## Analytics
 Google Analytics (GA4) tag `G-SKSZ174GDR` is present in the `<head>` of all 12 HTML pages.
+
+## Code.gs Repo Sync
+`appscript/Code.gs` now contains the complete, canonical Apps Script source including all calendar handlers. Keep it in sync whenever the live script is changed. The live version is identified by `doGet` returning `service: 'BS34 Endpoint v3'`.
 
 ## Pending / Known Issues
 - None known at this time.
