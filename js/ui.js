@@ -190,7 +190,6 @@ const UI = (() => {
                    loading="lazy"
                    onerror="this.closest('.post-attachment').style.display='none'">
             </a>
-            <span class="attachment-label">📷 ${escHtml(fileName || 'Image')}</span>
           </div>`;
       } else if (fileType === 'application/pdf') {
         attachmentHtml = `
