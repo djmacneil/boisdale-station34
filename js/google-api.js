@@ -164,7 +164,11 @@ const GoogleAPI = (() => {
         const end   = row[9] ? parseLocalDate(row[9]) : new Date('2099-12-31');
         return today >= start && today <= end;
       })
-      .reverse(); // newest first
+      .sort((a, b) => {
+        const da = a[1] ? parseLocalDate(a[1]) : new Date(0);
+        const db = b[1] ? parseLocalDate(b[1]) : new Date(0);
+        return db - da; // newest first
+      });
   }
 
   // ─── Config sheet ─────────────────────────────────────────────────────────
