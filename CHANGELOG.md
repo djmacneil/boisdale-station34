@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-04
+
+### New Pages
+- **book-hall.html** — mockup of the public hall booking request form. Deployed but not linked from the main nav yet.
+- **booking-manage.html** — mockup of the admin bookings management page. Deployed but not linked from the main nav yet.
+
+### Appearance
+- **manage.html / all post lists** — posts now sorted newest-first by Date column rather than by sheet row order.
+
 ## 2026-05-19
 
 ### Bug Fixes

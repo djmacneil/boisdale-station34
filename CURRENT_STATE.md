@@ -84,6 +84,12 @@ Returns `{ status: 'ok', service: 'BS34 Endpoint v3' }` — used as a health che
 | `upload.html` | Create new posts. Redirects to manage.html on success. |
 | `manage.html` | Edit and delete existing posts. Grouped by category then Active/Future/Expired. |
 | `events-manage.html` | Create, edit, and delete Google Calendar events including recurring events. |
+| `booking-manage.html` | **Mockup only** — admin page for managing hall bookings. Not linked from nav. |
+
+## Hall Booking (Mockup)
+- `book-hall.html` — public booking request form. Deployed at root, not wired to any backend, not linked from main nav.
+- `booking-manage.html` — admin bookings dashboard. Deployed at root, not wired to any backend, not linked from admin nav.
+- Both pages show an orange "MOCKUP" banner indicating they are not yet functional.
 
 ## Known Working
 - Creating posts with text and image/PDF attachments via upload.html
@@ -101,6 +107,7 @@ Returns `{ status: 'ok', service: 'BS34 Endpoint v3' }` — used as a health che
 ## Post Card Display
 - Category badge shown; posted date is intentionally hidden
 - Body text HTML-escaped then URLs linkified and newlines converted to `<br>`
+- Posts sorted newest-first by the Date column
 
 ## Apps Script Deployment
 - **Active URL:** stored in `CONFIG.APPS_SCRIPT_URL` in js/config.js
