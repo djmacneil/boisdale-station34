@@ -1,26 +1,21 @@
 <!DOCTYPE html>
-<!-- MOCKUP ONLY — not wired to any backend -->
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SKSZ174GDR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SKSZ174GDR');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Book the Hall — Boisdale Fire Station 34 [MOCKUP]</title>
+  <title>Book the Hall — Boisdale Fire Station 34</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
   <style>
-    /* ── Mockup banner ─────────────────────────────────────────── */
-    .mockup-banner {
-      background: #f39c12;
-      color: #fff;
-      text-align: center;
-      padding: .5rem 1rem;
-      font-family: 'Trebuchet MS', sans-serif;
-      font-size: .9rem;
-      font-weight: 600;
-      letter-spacing: .04em;
-    }
-
     /* ── Form layout ───────────────────────────────────────────── */
     .booking-container {
       max-width: 700px;
@@ -169,7 +164,8 @@
       transition: background .15s;
       width: 100%;
     }
-    .btn-submit:hover { background: var(--primary-dk); }
+    .btn-submit:hover:not(:disabled) { background: var(--primary-dk); }
+    .btn-submit:disabled { opacity: .65; cursor: not-allowed; }
     .form-note {
       font-size: .8rem;
       color: #888;
@@ -178,7 +174,21 @@
       font-family: 'Trebuchet MS', sans-serif;
     }
 
-    /* Success state (demo) */
+    /* Error */
+    .form-error {
+      background: #fdedec;
+      border: 1px solid #f1948a;
+      border-radius: 6px;
+      padding: .75rem 1rem;
+      margin-bottom: 1rem;
+      color: #943126;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-size: .9rem;
+      display: none;
+    }
+    .form-error.show { display: block; }
+
+    /* Success */
     .success-box {
       display: none;
       background: #eafaf1;
@@ -190,12 +200,21 @@
     }
     .success-box.show { display: block; }
     .success-box h3 { color: #27ae60; margin-bottom: .5rem; font-family: 'Trebuchet MS', sans-serif; }
-    .success-box p { color: #444; font-size: .95rem; margin: 0; }
+    .success-box p { color: #444; font-size: .95rem; margin: .4rem 0 0; }
+    .success-booking-id {
+      display: inline-block;
+      background: #d5f5e3;
+      border: 1px solid #82e0aa;
+      border-radius: 4px;
+      padding: .2rem .6rem;
+      font-family: monospace;
+      font-size: 1.1rem;
+      color: #1e8449;
+      margin: .5rem 0;
+    }
   </style>
 </head>
 <body class="page-wrap">
-
-  <div class="mockup-banner">⚠ DESIGN MOCKUP — Not connected to any backend — For approval only</div>
 
   <header id="site-header">
     <div class="header-inner">
@@ -229,6 +248,9 @@
       </div>
 
       <div class="form-card" id="booking-form-card">
+
+        <div class="form-error" id="form-error"></div>
+
         <form id="booking-form" onsubmit="handleSubmit(event)">
 
           <!-- Section 1: Contact Info -->
@@ -330,7 +352,7 @@
 
           <!-- Submit -->
           <div class="form-submit">
-            <button type="submit" class="btn-submit">Submit Booking Request</button>
+            <button type="submit" class="btn-submit" id="submit-btn">Submit Booking Request</button>
             <p class="form-note">
               Your request will be reviewed and a hall representative will be in touch within 2–3 business days.
             </p>
@@ -338,11 +360,15 @@
 
         </form>
 
-        <!-- Success message (shown after submit in demo) -->
+        <!-- Success message -->
         <div class="success-box" id="success-box">
-          <h3>✓ Request Submitted!</h3>
+          <h3>&#10003; Request Submitted!</h3>
+          <div class="success-booking-id" id="booking-ref-display"></div>
           <p>Thank you — your booking request has been received. A hall representative will
           contact you at the email or phone number you provided within 2–3 business days.</p>
+          <p style="font-size:.85rem; color:#888; margin-top:.75rem;">
+            Please keep your booking reference number for your records.
+          </p>
         </div>
       </div>
 
@@ -353,13 +379,62 @@
     Boisdale Fire Station 34 &mdash; Nova Scotia
   </footer>
 
+  <script src="js/config.js"></script>
   <script>
     lucide.createIcons();
-    function handleSubmit(e) {
+
+    async function handleSubmit(e) {
       e.preventDefault();
-      // Demo: show success message
-      document.getElementById('booking-form').style.display = 'none';
-      document.getElementById('success-box').classList.add('show');
+      const form = e.target;
+      const btn  = document.getElementById('submit-btn');
+      const errEl = document.getElementById('form-error');
+
+      btn.disabled    = true;
+      btn.textContent = 'Submitting…';
+      errEl.classList.remove('show');
+
+      const facilities = [...form.querySelectorAll('input[type="checkbox"]:checked')]
+        .map(cb => cb.value).join(', ');
+
+      const payload = {
+        action:         'booking-submit',
+        name:           form.name.value.trim(),
+        email:          form.email.value.trim(),
+        phone:          form.phone.value.trim(),
+        event_name:     form.event_name.value.trim(),
+        event_date:     form.event_date.value,
+        event_end_date: form.event_end_date.value,
+        start_time:     form.start_time.value,
+        end_time:       form.end_time.value,
+        attendance:     form.attendance.value,
+        facilities:     facilities,
+        notes:          form.notes.value.trim()
+      };
+
+      try {
+        const resp   = await fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await resp.json();
+        if (result.status === 'ok') {
+          form.style.display = 'none';
+          document.getElementById('booking-ref-display').textContent = result.bookingId;
+          document.getElementById('success-box').classList.add('show');
+        } else {
+          showError('Error: ' + result.message);
+          btn.disabled    = false;
+          btn.textContent = 'Submit Booking Request';
+        }
+      } catch (err) {
+        showError('Could not submit — please check your connection and try again.');
+        btn.disabled    = false;
+        btn.textContent = 'Submit Booking Request';
+      }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('form-error');
+      el.textContent = msg;
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   </script>
 

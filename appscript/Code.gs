@@ -1,7 +1,8 @@
 // ============================================================
 //  Boisdale Station 34 — Apps Script POST endpoint
-//  Handles posts (sheet), file attachments (Drive), and
-//  calendar events (create / edit / delete).
+//  Handles posts (sheet), file attachments (Drive),
+//  calendar events (create / edit / delete), and
+//  hall booking requests (submit / update / list).
 //
 //  Setup:
 //    1. Paste this entire file into your Apps Script project.
@@ -12,13 +13,89 @@
 // ============================================================
 
 // ── Configuration ────────────────────────────────────────────
-const SHARED_TOKEN    = 'your-secret-token-here';   // must match localStorage token
-const SHEET_ID        = 'YOUR_GOOGLE_SHEET_ID';     // from Sheet URL
-const SHEET_TAB_NAME  = 'Posts';
-const DRIVE_FOLDER_ID = 'YOUR_DRIVE_FOLDER_ID';
-const CALENDAR_ID     = 'YOUR_CALENDAR_ID';         // from Calendar settings
-const MAX_FILE_MB     = 10;
+const SHARED_TOKEN      = 'your-secret-token-here';   // must match localStorage token
+const SHEET_ID          = 'YOUR_GOOGLE_SHEET_ID';     // from Sheet URL
+const SHEET_TAB_NAME    = 'Posts';
+const BOOKING_TAB_NAME  = 'HallBookings';              // NEW — booking requests tab
+const DRIVE_FOLDER_ID   = 'YOUR_DRIVE_FOLDER_ID';
+const CALENDAR_ID       = 'YOUR_CALENDAR_ID';         // from Calendar settings
+const MAX_FILE_MB       = 10;
 // ─────────────────────────────────────────────────────────────
+
+// HallBookings column indices (0-based).
+// Public form writes A–N (0–13). Staff writes Q–AO (16–40).
+const BC = {
+  TIMESTAMP:        0,   // A  — submission timestamp
+  BOOKING_ID:       1,   // B  — BK-YYYY-NNN
+  STATUS:           2,   // C  — workflow status
+  NAME:             3,   // D
+  EMAIL:            4,   // E
+  PHONE:            5,   // F
+  EVENT_NAME:       6,   // G
+  EVENT_DATE:       7,   // H
+  EVENT_END_DATE:   8,   // I
+  START_TIME:       9,   // J
+  END_TIME:         10,  // K
+  ATTENDANCE:       11,  // L
+  FACILITIES:       12,  // M  — comma-separated checklist
+  REQUESTOR_NOTES:  13,  // N
+  // O (14), P (15) reserved
+  RENTAL_FEE:       16,  // Q  ── staff fields begin ──
+  DEPOSIT_REQUIRED: 17,  // R
+  DEPOSIT_AMOUNT:   18,  // S
+  DEPOSIT_RECEIVED: 19,  // T
+  FINAL_DUE:        20,  // U
+  FINAL_RECEIVED:   21,  // V
+  SETUP_TIME:       22,  // W
+  TEARDOWN_TIME:    23,  // X
+  TABLES:           24,  // Y
+  CHAIRS:           25,  // Z
+  KITCHEN:          26,  // AA — "Yes – details" or "No"
+  BAR:              27,  // AB — "Yes – Licence #..." or "No"
+  STAGE:            28,  // AC
+  AV:               29,  // AD
+  PARKING_NOTES:    30,  // AE
+  CLEANING_NOTES:   31,  // AF
+  SPECIAL_CONDITIONS: 32, // AG
+  ASSIGNED_TO:      33,  // AH
+  FIRST_CONTACT:    34,  // AI
+  CONTACT_METHOD:   35,  // AJ
+  CONTRACT_SENT:    36,  // AK
+  CONTRACT_SIGNED:  37,  // AL
+  INTERNAL_NOTES:   38,  // AM
+  LAST_UPDATED:     39,  // AN — auto-written on every staff save
+  LAST_UPDATED_BY:  40,  // AO
+  _TOTAL_COLS:      41   // A–AO inclusive
+};
+
+// Staff-editable fields: maps payload key → column index.
+// Only these keys are accepted in a booking-update call.
+const STAFF_FIELDS = {
+  status:             BC.STATUS,
+  assigned_to:        BC.ASSIGNED_TO,
+  internal_notes:     BC.INTERNAL_NOTES,
+  rental_fee:         BC.RENTAL_FEE,
+  deposit_required:   BC.DEPOSIT_REQUIRED,
+  deposit_amount:     BC.DEPOSIT_AMOUNT,
+  deposit_received:   BC.DEPOSIT_RECEIVED,
+  final_due:          BC.FINAL_DUE,
+  final_received:     BC.FINAL_RECEIVED,
+  setup_time:         BC.SETUP_TIME,
+  teardown_time:      BC.TEARDOWN_TIME,
+  tables:             BC.TABLES,
+  chairs:             BC.CHAIRS,
+  kitchen:            BC.KITCHEN,
+  bar:                BC.BAR,
+  stage:              BC.STAGE,
+  av:                 BC.AV,
+  parking_notes:      BC.PARKING_NOTES,
+  cleaning_notes:     BC.CLEANING_NOTES,
+  special_conditions: BC.SPECIAL_CONDITIONS,
+  first_contact:      BC.FIRST_CONTACT,
+  contact_method:     BC.CONTACT_METHOD,
+  contract_sent:      BC.CONTRACT_SENT,
+  contract_signed:    BC.CONTRACT_SIGNED
+};
 
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/png', 'image/gif', 'image/webp',
@@ -33,6 +110,62 @@ function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
 
+    // ── Booking: submit (public form — no token required) ─────
+    if (data.action === 'booking-submit') {
+      const reqd = ['name', 'email', 'phone', 'event_name', 'event_date'];
+      for (const f of reqd) {
+        if (!data[f] || String(data[f]).trim() === '') {
+          output.setContent(JSON.stringify({ status: 'error', message: `Missing field: ${f}` }));
+          return output;
+        }
+      }
+
+      const ss      = SpreadsheetApp.openById(SHEET_ID);
+      const bSheet  = ss.getSheetByName(BOOKING_TAB_NAME);
+      if (!bSheet) {
+        output.setContent(JSON.stringify({ status: 'error', message: `Sheet tab "${BOOKING_TAB_NAME}" not found.` }));
+        return output;
+      }
+
+      // Generate BookingID: BK-YYYY-NNN (padded sequential)
+      const year    = new Date().getFullYear();
+      const lastRow = bSheet.getLastRow();
+      let   counter = 1;
+      if (lastRow > 1) {
+        const ids = bSheet.getRange(2, BC.BOOKING_ID + 1, lastRow - 1, 1).getValues().flat();
+        const prefix = `BK-${year}-`;
+        ids.forEach(id => {
+          if (String(id).startsWith(prefix)) {
+            const n = parseInt(String(id).replace(prefix, ''), 10);
+            if (!isNaN(n) && n >= counter) counter = n + 1;
+          }
+        });
+      }
+      const bookingId = `BK-${year}-${String(counter).padStart(3, '0')}`;
+
+      const row = new Array(BC._TOTAL_COLS).fill('');
+      row[BC.TIMESTAMP]       = new Date().toISOString();
+      row[BC.BOOKING_ID]      = bookingId;
+      row[BC.STATUS]          = 'Pending';
+      row[BC.NAME]            = data.name.trim();
+      row[BC.EMAIL]           = data.email.trim();
+      row[BC.PHONE]           = data.phone.trim();
+      row[BC.EVENT_NAME]      = data.event_name.trim();
+      row[BC.EVENT_DATE]      = data.event_date.trim();
+      row[BC.EVENT_END_DATE]  = (data.event_end_date || '').trim();
+      row[BC.START_TIME]      = (data.start_time || '').trim();
+      row[BC.END_TIME]        = (data.end_time || '').trim();
+      row[BC.ATTENDANCE]      = (data.attendance || '').toString().trim();
+      row[BC.FACILITIES]      = (data.facilities || '').trim();
+      row[BC.REQUESTOR_NOTES] = (data.notes || '').trim();
+
+      bSheet.appendRow(row);
+
+      output.setContent(JSON.stringify({ status: 'ok', bookingId: bookingId }));
+      return output;
+    }
+
+    // All other actions require a valid token
     if (!data.token || data.token !== SHARED_TOKEN) {
       output.setContent(JSON.stringify({ status: 'error', message: 'Invalid token.' }));
       return output;
@@ -123,6 +256,51 @@ function doPost(e) {
       }
 
       output.setContent(JSON.stringify({ status: 'ok', message: 'Event deleted.' }));
+      return output;
+    }
+
+    // ── Booking: update (staff form) ──────────────────────────
+    if (data.action === 'booking-update') {
+      if (!data.booking_id) {
+        output.setContent(JSON.stringify({ status: 'error', message: 'Missing field: booking_id' }));
+        return output;
+      }
+
+      const ss     = SpreadsheetApp.openById(SHEET_ID);
+      const bSheet = ss.getSheetByName(BOOKING_TAB_NAME);
+      if (!bSheet) {
+        output.setContent(JSON.stringify({ status: 'error', message: `Sheet tab "${BOOKING_TAB_NAME}" not found.` }));
+        return output;
+      }
+
+      // Find the row with this BookingID (column B)
+      const lastRow = bSheet.getLastRow();
+      if (lastRow < 2) {
+        output.setContent(JSON.stringify({ status: 'error', message: 'Booking not found.' }));
+        return output;
+      }
+      const ids       = bSheet.getRange(2, BC.BOOKING_ID + 1, lastRow - 1, 1).getValues().flat();
+      const rowIndex  = ids.findIndex(id => id === data.booking_id);
+      if (rowIndex === -1) {
+        output.setContent(JSON.stringify({ status: 'error', message: `Booking ${data.booking_id} not found.` }));
+        return output;
+      }
+      const sheetRow = rowIndex + 2; // +1 for header, +1 for 1-based index
+
+      // Update only the staff fields present in the payload
+      for (const [key, colIndex] of Object.entries(STAFF_FIELDS)) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          bSheet.getRange(sheetRow, colIndex + 1).setValue(data[key]);
+        }
+      }
+
+      // Always stamp last-updated
+      bSheet.getRange(sheetRow, BC.LAST_UPDATED + 1).setValue(new Date().toISOString());
+      if (data.updated_by) {
+        bSheet.getRange(sheetRow, BC.LAST_UPDATED_BY + 1).setValue(data.updated_by);
+      }
+
+      output.setContent(JSON.stringify({ status: 'ok', message: 'Booking updated.' }));
       return output;
     }
 
@@ -256,9 +434,45 @@ function sanitizeFileName(name) {
     .substring(0, 200) || 'attachment';
 }
 
-// ── GET: health check / version ───────────────────────────────
-function doGet() {
+// ── GET: health check + optional booking list ─────────────────
+// ?action=bookings&token=... returns all HallBookings rows as JSON.
+// No token / wrong token returns the standard version string.
+function doGet(e) {
+  const params = (e && e.parameter) ? e.parameter : {};
+
+  if (params.action === 'bookings' && params.token === SHARED_TOKEN) {
+    try {
+      const ss     = SpreadsheetApp.openById(SHEET_ID);
+      const bSheet = ss.getSheetByName(BOOKING_TAB_NAME);
+      if (!bSheet || bSheet.getLastRow() < 2) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ status: 'ok', bookings: [] }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+
+      const rows = bSheet.getRange(2, 1, bSheet.getLastRow() - 1, BC._TOTAL_COLS).getValues();
+      const keys = Object.keys(BC).filter(k => k !== '_TOTAL_COLS');
+
+      // Build array of objects using BC key names as property names (lowercased)
+      const bookings = rows.map(row => {
+        const obj = {};
+        keys.forEach(k => { obj[k.toLowerCase()] = row[BC[k]]; });
+        return obj;
+      });
+
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', bookings: bookings }))
+        .setMimeType(ContentService.MimeType.JSON);
+
+    } catch (err) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // Default: version string
   return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok', service: 'BS34 Endpoint v3' }))
+    .createTextOutput(JSON.stringify({ status: 'ok', service: 'BS34 Endpoint v4' }))
     .setMimeType(ContentService.MimeType.JSON);
 }

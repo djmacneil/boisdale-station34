@@ -1,25 +1,20 @@
 <!DOCTYPE html>
-<!-- MOCKUP ONLY — not wired to any backend -->
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SKSZ174GDR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SKSZ174GDR');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Booking Management — Boisdale Fire Station 34 [MOCKUP]</title>
+  <title>Booking Management — Boisdale Fire Station 34</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    /* ── Mockup banner ─────────────────────────────────────────── */
-    .mockup-banner {
-      background: #f39c12;
-      color: #fff;
-      text-align: center;
-      padding: .5rem 1rem;
-      font-family: 'Trebuchet MS', sans-serif;
-      font-size: .9rem;
-      font-weight: 600;
-      letter-spacing: .04em;
-    }
-
     body { font-family: 'Trebuchet MS', sans-serif; }
 
     /* ── Page layout ───────────────────────────────────────────── */
@@ -45,7 +40,30 @@
       padding: 1.5rem 1rem .5rem;
     }
     .page-header h1 { font-size: 1.4rem; margin-bottom: .25rem; }
-    .page-header p { color: #666; font-size: .9rem; }
+    .page-header p { color: #666; font-size: .9rem; margin: 0 0 .75rem; }
+
+    /* ── Token row ─────────────────────────────────────────────── */
+    .token-group { margin-top: .75rem; }
+    .token-group label { font-size: .85rem; font-weight: 600; color: #444; display: block; margin-bottom: .3rem; }
+    .token-row { display: flex; gap: .5rem; }
+    .token-row input {
+      flex: 1; max-width: 320px;
+      padding: .5rem .75rem;
+      border: 1px solid #d4aa40; border-radius: 5px;
+      font-family: monospace; font-size: .95rem;
+    }
+    .btn-load {
+      padding: .5rem 1.25rem;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 5px;
+      font-family: inherit; font-size: .9rem; font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-load:hover { background: var(--primary-dk); }
+    .token-note { font-size: .78rem; color: #888; margin-top: .3rem; }
+    .load-status { font-size: .85rem; margin-top: .4rem; }
+    .load-status.ok  { color: #27ae60; }
+    .load-status.err { color: #c0392b; }
 
     /* ── Booking list panel ────────────────────────────────────── */
     .list-panel {
@@ -64,6 +82,7 @@
       justify-content: space-between;
       align-items: center;
     }
+    .list-count { font-size: .78rem; opacity: .8; }
     .list-filter {
       background: #f5f5f5;
       border-bottom: 1px solid #ddd;
@@ -224,10 +243,7 @@
       gap: .5rem;
       align-items: center;
     }
-    .yn-toggle select {
-      width: auto;
-      min-width: 80px;
-    }
+    .yn-toggle select { width: auto; min-width: 80px; }
     .yn-detail { flex: 1; }
 
     /* Save bar */
@@ -251,42 +267,28 @@
       cursor: pointer;
       transition: background .15s;
     }
-    .btn-save:hover { background: var(--primary-dk); }
-    .btn-cancel {
-      background: none;
-      color: #666;
-      border: 1px solid #ccc;
-      padding: .65rem 1.25rem;
-      font-size: .9rem;
-      font-family: inherit;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+    .btn-save:hover:not(:disabled) { background: var(--primary-dk); }
+    .btn-save:disabled { opacity: .6; cursor: not-allowed; }
     .save-note { font-size: .8rem; color: #999; margin-left: auto; }
+    .save-note.ok  { color: #27ae60; }
+    .save-note.err { color: #c0392b; }
 
-    /* Empty state */
+    /* Empty / loading states */
     .empty-state {
       text-align: center;
       padding: 3rem 1.5rem;
       color: #aaa;
     }
-    .empty-state i { display: block; margin: 0 auto 1rem; }
     .empty-state p { font-size: .9rem; }
-
-    /* New booking badge */
-    .new-dot {
-      display: inline-block;
-      width: 8px; height: 8px;
-      background: #e74c3c;
-      border-radius: 50%;
-      margin-left: 4px;
-      vertical-align: middle;
+    .detail-placeholder {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #bbb;
+      font-size: .9rem;
     }
   </style>
 </head>
 <body class="page-wrap">
-
-  <div class="mockup-banner">⚠ DESIGN MOCKUP — Not connected to any backend — For approval only</div>
 
   <header id="site-header">
     <div class="header-inner">
@@ -303,6 +305,15 @@
   <div class="page-header">
     <h1><i data-lucide="calendar-check" style="vertical-align:-4px; width:22px; height:22px;"></i> Hall Booking Management</h1>
     <p>Review and manage booking requests. Click a request to open the full detail form.</p>
+    <div class="token-group">
+      <label for="manage-token">Contributor Token</label>
+      <div class="token-row">
+        <input type="password" id="manage-token" placeholder="Enter your shared token" autocomplete="off">
+        <button class="btn-load" onclick="loadBookings()">Load Bookings</button>
+      </div>
+      <div class="token-note">Token is saved to this browser.</div>
+      <div class="load-status" id="load-status"></div>
+    </div>
   </div>
 
   <div class="manage-wrap">
@@ -311,10 +322,10 @@
     <div class="list-panel">
       <div class="list-header">
         <span>Booking Requests</span>
-        <span style="font-size:.78rem; opacity:.8;">5 requests</span>
+        <span class="list-count" id="list-count"></span>
       </div>
       <div class="list-filter">
-        <select onchange="filterList(this.value)">
+        <select id="status-filter" onchange="renderList()">
           <option value="all">All Statuses</option>
           <option value="Pending">Pending</option>
           <option value="In Discussion">In Discussion</option>
@@ -325,357 +336,441 @@
           <option value="Cancelled">Cancelled</option>
         </select>
       </div>
-
-      <!-- Sample bookings -->
-      <div class="booking-item active" onclick="openBooking('BK-2026-005')">
-        <div class="booking-item-top">
-          <div>
-            <div class="booking-id">BK-2026-005</div>
-            <div class="booking-name">Sarah MacDonald <span class="new-dot" title="New"></span></div>
-          </div>
-          <span class="badge badge-pending">Pending</span>
-        </div>
-        <div class="booking-event">Birthday Party — ~60 guests</div>
-        <div class="booking-date">Jul 19, 2026 &nbsp;·&nbsp; Submitted Jun 3</div>
+      <div id="booking-list">
+        <div class="empty-state"><p>Enter your token and click Load Bookings.</p></div>
       </div>
-
-      <div class="booking-item" onclick="openBooking('BK-2026-004')">
-        <div class="booking-item-top">
-          <div>
-            <div class="booking-id">BK-2026-004</div>
-            <div class="booking-name">Cape Breton Fiddle Society</div>
-          </div>
-          <span class="badge badge-confirmed">Confirmed</span>
-        </div>
-        <div class="booking-event">Summer Ceilidh & Dance</div>
-        <div class="booking-date">Aug 2, 2026 &nbsp;·&nbsp; Submitted May 28</div>
-      </div>
-
-      <div class="booking-item" onclick="openBooking('BK-2026-003')">
-        <div class="booking-item-top">
-          <div>
-            <div class="booking-id">BK-2026-003</div>
-            <div class="booking-name">Donnie & Anne MacNeil</div>
-          </div>
-          <span class="badge badge-deposit">Deposit Rcvd</span>
-        </div>
-        <div class="booking-event">Wedding Reception</div>
-        <div class="booking-date">Sep 6, 2026 &nbsp;·&nbsp; Submitted May 10</div>
-      </div>
-
-      <div class="booking-item" onclick="openBooking('BK-2026-002')">
-        <div class="booking-item-top">
-          <div>
-            <div class="booking-id">BK-2026-002</div>
-            <div class="booking-name">Boisdale Parent Council</div>
-          </div>
-          <span class="badge badge-discussion">In Discussion</span>
-        </div>
-        <div class="booking-event">Year-End School Banquet</div>
-        <div class="booking-date">Jun 27, 2026 &nbsp;·&nbsp; Submitted May 20</div>
-      </div>
-
-      <div class="booking-item" onclick="openBooking('BK-2026-001')">
-        <div class="booking-item-top">
-          <div>
-            <div class="booking-id">BK-2026-001</div>
-            <div class="booking-name">Seniors Drop-In Group</div>
-          </div>
-          <span class="badge badge-completed">Completed</span>
-        </div>
-        <div class="booking-event">Monthly Luncheon</div>
-        <div class="booking-date">May 15, 2026 &nbsp;·&nbsp; Submitted Apr 30</div>
-      </div>
-
     </div>
 
     <!-- ── Right: detail form ────────────────────────────────────── -->
     <div class="detail-panel" id="detail-panel">
-
-      <div class="detail-header">
-        <div>
-          <div class="bid">BK-2026-005 &nbsp;·&nbsp; Submitted Jun 3, 2026</div>
-          <h2>Sarah MacDonald — Birthday Party</h2>
-        </div>
-        <span class="badge badge-pending" id="header-badge">Pending</span>
-      </div>
-
-      <div class="detail-body">
-
-        <!-- Read-only request info -->
-        <div class="request-block">
-          <div class="request-block-title">Requestor Submission (read-only)</div>
-          <div class="req-grid">
-            <div class="req-field">
-              <span class="req-label">Name</span>
-              <span class="req-val">Sarah MacDonald</span>
-            </div>
-            <div class="req-field">
-              <span class="req-label">Phone</span>
-              <span class="req-val">(902) 555-0187</span>
-            </div>
-            <div class="req-field">
-              <span class="req-label">Email</span>
-              <span class="req-val">sarah.macdonald@example.com</span>
-            </div>
-            <div class="req-field">
-              <span class="req-label">Attendance</span>
-              <span class="req-val">~60 guests</span>
-            </div>
-            <div class="req-field">
-              <span class="req-label">Event Date</span>
-              <span class="req-val">Saturday, July 19, 2026</span>
-            </div>
-            <div class="req-field">
-              <span class="req-label">Requested Times</span>
-              <span class="req-val">2:00 PM – 11:00 PM</span>
-            </div>
-            <div class="req-field req-full">
-              <span class="req-label">Facilities Requested</span>
-              <span class="req-val">Kitchen, Tables &amp; chairs, Bar service, AV/Sound</span>
-            </div>
-            <div class="req-field req-full">
-              <span class="req-label">Notes from Requestor</span>
-              <span class="req-val">50th birthday celebration. Need to set up the afternoon before if possible. Will hire own caterer.</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Staff sections -->
-        <form id="staff-form" onsubmit="saveBooking(event)">
-
-          <!-- Status & Assignment -->
-          <div class="staff-section">
-            <div class="staff-section-title">Status &amp; Assignment</div>
-            <div class="fg-row">
-              <div class="fg">
-                <label>Booking Status</label>
-                <select name="status" id="status-select" onchange="updateBadge(this.value)">
-                  <option value="Pending" selected>Pending</option>
-                  <option value="In Discussion">In Discussion</option>
-                  <option value="Confirmed">Confirmed</option>
-                  <option value="Deposit Received">Deposit Received</option>
-                  <option value="Declined">Declined</option>
-                  <option value="Cancelled">Cancelled</option>
-                  <option value="Completed">Completed</option>
-                </select>
-              </div>
-              <div class="fg">
-                <label>Hall Contact Assigned</label>
-                <input type="text" name="assigned_to" placeholder="Name of hall rep">
-              </div>
-            </div>
-            <div class="fg">
-              <label>Internal Notes</label>
-              <textarea name="internal_notes" placeholder="Notes visible to hall staff only…"></textarea>
-            </div>
-          </div>
-
-          <!-- Financials -->
-          <div class="staff-section">
-            <div class="staff-section-title">Financials</div>
-            <div class="fg-row-3">
-              <div class="fg">
-                <label>Rental Fee ($)</label>
-                <input type="number" name="rental_fee" placeholder="0.00" step="0.01">
-              </div>
-              <div class="fg">
-                <label>Deposit Required</label>
-                <select name="deposit_required">
-                  <option value="">—</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
-              <div class="fg">
-                <label>Deposit Amount ($)</label>
-                <input type="number" name="deposit_amount" placeholder="0.00" step="0.01">
-              </div>
-            </div>
-            <div class="fg-row">
-              <div class="fg">
-                <label>Deposit Received Date</label>
-                <input type="date" name="deposit_received">
-              </div>
-              <div class="fg">
-                <label>Final Payment Due</label>
-                <input type="date" name="final_due">
-              </div>
-            </div>
-            <div class="fg" style="max-width:200px;">
-              <label>Final Payment Received</label>
-              <input type="date" name="final_received">
-            </div>
-          </div>
-
-          <!-- Hall Setup -->
-          <div class="staff-section">
-            <div class="staff-section-title">Hall Setup &amp; Logistics</div>
-            <div class="fg-row">
-              <div class="fg">
-                <label>Setup Date / Time</label>
-                <input type="text" name="setup_time" placeholder="e.g. Jul 18 @ 3:00 PM">
-              </div>
-              <div class="fg">
-                <label>Teardown By</label>
-                <input type="text" name="teardown_time" placeholder="e.g. Jul 20 @ noon">
-              </div>
-            </div>
-            <div class="fg-row">
-              <div class="fg">
-                <label>Tables Required</label>
-                <input type="text" name="tables" placeholder="e.g. 8 × 8ft banquet">
-              </div>
-              <div class="fg">
-                <label>Chairs Required</label>
-                <input type="text" name="chairs" placeholder="e.g. 65 chairs">
-              </div>
-            </div>
-
-            <div class="fg">
-              <label>Kitchen</label>
-              <div class="yn-toggle">
-                <select name="kitchen_yn" style="width:90px;">
-                  <option value="">—</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-                <input class="yn-detail" type="text" name="kitchen_detail" placeholder="Details (caterer name, access needed, etc.)">
-              </div>
-            </div>
-
-            <div class="fg">
-              <label>Bar / Alcohol Service</label>
-              <div class="yn-toggle">
-                <select name="bar_yn" style="width:90px;">
-                  <option value="">—</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-                <input class="yn-detail" type="text" name="bar_detail" placeholder="Licence # or details">
-              </div>
-            </div>
-
-            <div class="fg">
-              <label>Stage</label>
-              <div class="yn-toggle">
-                <select name="stage_yn" style="width:90px;">
-                  <option value="">—</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-                <input class="yn-detail" type="text" name="stage_detail" placeholder="Configuration or notes">
-              </div>
-            </div>
-
-            <div class="fg">
-              <label>AV / Sound</label>
-              <div class="yn-toggle">
-                <select name="av_yn" style="width:90px;">
-                  <option value="">—</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-                <input class="yn-detail" type="text" name="av_detail" placeholder="Requirements or notes">
-              </div>
-            </div>
-
-            <div class="fg">
-              <label>Parking Notes</label>
-              <input type="text" name="parking_notes" placeholder="e.g. overflow at school lot, shuttle arranged">
-            </div>
-
-            <div class="fg">
-              <label>Cleaning / Post-Event Requirements</label>
-              <input type="text" name="cleaning_notes" placeholder="e.g. client responsible, hall cleaning fee included">
-            </div>
-
-            <div class="fg">
-              <label>Special Conditions / Agreements</label>
-              <textarea name="special_conditions" placeholder="Any conditions discussed and agreed upon…" style="min-height:70px;"></textarea>
-            </div>
-          </div>
-
-          <!-- Communication -->
-          <div class="staff-section">
-            <div class="staff-section-title">Communication &amp; Contracts</div>
-            <div class="fg-row">
-              <div class="fg">
-                <label>First Contact Date</label>
-                <input type="date" name="first_contact_date">
-              </div>
-              <div class="fg">
-                <label>Contact Method</label>
-                <select name="contact_method">
-                  <option value="">—</option>
-                  <option value="Phone">Phone</option>
-                  <option value="Email">Email</option>
-                  <option value="In person">In person</option>
-                  <option value="Text">Text</option>
-                </select>
-              </div>
-            </div>
-            <div class="fg-row">
-              <div class="fg">
-                <label>Contract / Agreement Sent</label>
-                <input type="date" name="contract_sent">
-              </div>
-              <div class="fg">
-                <label>Contract Signed Date</label>
-                <input type="date" name="contract_signed">
-              </div>
-            </div>
-          </div>
-
-        </form>
-      </div><!-- /detail-body -->
-
-      <div class="save-bar">
-        <button class="btn-save" onclick="saveBooking(event)">Save Changes</button>
-        <button class="btn-cancel" type="button">Discard</button>
-        <span class="save-note">Last saved: never</span>
-      </div>
-
-    </div><!-- /detail-panel -->
+      <div class="detail-placeholder">Select a booking from the list to view details.</div>
+    </div>
 
   </div><!-- /manage-wrap -->
 
+  <script src="js/config.js"></script>
   <script>
     lucide.createIcons();
 
+    const tokenInput = document.getElementById('manage-token');
+    const saved = localStorage.getItem('bs34_post_token');
+    if (saved) tokenInput.value = saved;
+    tokenInput.addEventListener('change', () => {
+      if (tokenInput.value) localStorage.setItem('bs34_post_token', tokenInput.value);
+    });
+
+    function getToken() { return tokenInput.value.trim(); }
+
     const BADGE_CLASSES = {
-      'Pending':         'badge-pending',
-      'In Discussion':   'badge-discussion',
-      'Confirmed':       'badge-confirmed',
-      'Deposit Received':'badge-deposit',
-      'Declined':        'badge-declined',
-      'Cancelled':       'badge-cancelled',
-      'Completed':       'badge-completed'
+      'Pending':          'badge-pending',
+      'In Discussion':    'badge-discussion',
+      'Confirmed':        'badge-confirmed',
+      'Deposit Received': 'badge-deposit',
+      'Declined':         'badge-declined',
+      'Cancelled':        'badge-cancelled',
+      'Completed':        'badge-completed'
     };
 
-    function updateBadge(val) {
+    function badgeHtml(status) {
+      const cls = BADGE_CLASSES[status] || 'badge-pending';
+      return `<span class="badge ${cls}">${status || 'Pending'}</span>`;
+    }
+
+    function fmtDate(d) {
+      if (!d) return '';
+      const dt = new Date(d + (d.includes('T') ? '' : 'T00:00:00'));
+      return dt.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function fmtTime(t) {
+      if (!t) return '';
+      const [h, m] = t.split(':').map(Number);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`;
+    }
+
+    let allBookings   = [];
+    let activeBooking = null;
+
+    async function loadBookings() {
+      const token = getToken();
+      if (!token) { setLoadStatus('Please enter your token first.', 'err'); return; }
+      localStorage.setItem('bs34_post_token', token);
+      setLoadStatus('Loading…', '');
+      document.getElementById('booking-list').innerHTML = '<div class="empty-state"><p>Loading…</p></div>';
+
+      try {
+        const url = `${CONFIG.APPS_SCRIPT_URL}?action=bookings&token=${encodeURIComponent(token)}`;
+        const resp   = await fetch(url);
+        const result = await resp.json();
+        if (result.status !== 'ok') {
+          setLoadStatus('Error: ' + result.message, 'err');
+          return;
+        }
+        allBookings = result.bookings || [];
+        // Sort newest first (by timestamp desc)
+        allBookings.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+        renderList();
+        setLoadStatus(`Loaded ${allBookings.length} booking${allBookings.length !== 1 ? 's' : ''}.`, 'ok');
+      } catch (err) {
+        setLoadStatus('Could not load — check your connection.', 'err');
+      }
+    }
+
+    function setLoadStatus(msg, type) {
+      const el = document.getElementById('load-status');
+      el.textContent = msg;
+      el.className = 'load-status' + (type ? ' ' + type : '');
+    }
+
+    function renderList() {
+      const filter = document.getElementById('status-filter').value;
+      const items  = filter === 'all' ? allBookings : allBookings.filter(b => b.status === filter);
+      document.getElementById('list-count').textContent = `${items.length} request${items.length !== 1 ? 's' : ''}`;
+
+      if (items.length === 0) {
+        document.getElementById('booking-list').innerHTML =
+          '<div class="empty-state"><p>No bookings match this filter.</p></div>';
+        return;
+      }
+
+      document.getElementById('booking-list').innerHTML = items.map(b => {
+        const isActive = activeBooking && activeBooking.booking_id === b.booking_id;
+        return `
+          <div class="booking-item${isActive ? ' active' : ''}" onclick="openBooking('${b.booking_id}')">
+            <div class="booking-item-top">
+              <div>
+                <div class="booking-id">${b.booking_id}</div>
+                <div class="booking-name">${esc(b.name)}</div>
+              </div>
+              ${badgeHtml(b.status)}
+            </div>
+            <div class="booking-event">${esc(b.event_name)}</div>
+            <div class="booking-date">${fmtDate(b.event_date)}${b.timestamp ? ' &nbsp;·&nbsp; Submitted ' + fmtDate(b.timestamp) : ''}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function esc(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function openBooking(id) {
+      activeBooking = allBookings.find(b => b.booking_id === id) || null;
+      renderList();
+      if (!activeBooking) return;
+      const b = activeBooking;
+      renderDetail(b);
+    }
+
+    function parseYn(val) {
+      if (!val) return { yn: '', detail: '' };
+      if (String(val).startsWith('Yes')) {
+        const detail = String(val).replace(/^Yes\s*[–-]\s*/, '');
+        return { yn: 'Yes', detail: detail === 'Yes' ? '' : detail };
+      }
+      return { yn: String(val), detail: '' };
+    }
+
+    function renderDetail(b) {
+      const times = [b.start_time ? fmtTime(b.start_time) : '', b.end_time ? fmtTime(b.end_time) : '']
+        .filter(Boolean).join(' – ') || '—';
+      const kitchen = parseYn(b.kitchen);
+      const bar     = parseYn(b.bar);
+      const stage   = parseYn(b.stage);
+      const av      = parseYn(b.av);
+
+      document.getElementById('detail-panel').innerHTML = `
+        <div class="detail-header">
+          <div>
+            <div class="bid">${esc(b.booking_id)} &nbsp;·&nbsp; Submitted ${fmtDate(b.timestamp)}</div>
+            <h2>${esc(b.name)} — ${esc(b.event_name)}</h2>
+          </div>
+          <span class="badge ${BADGE_CLASSES[b.status] || 'badge-pending'}" id="header-badge">${esc(b.status) || 'Pending'}</span>
+        </div>
+
+        <div class="detail-body">
+
+          <div class="request-block">
+            <div class="request-block-title">Requestor Submission (read-only)</div>
+            <div class="req-grid">
+              <div class="req-field"><span class="req-label">Name</span><span class="req-val">${esc(b.name)}</span></div>
+              <div class="req-field"><span class="req-label">Phone</span><span class="req-val">${esc(b.phone) || '—'}</span></div>
+              <div class="req-field"><span class="req-label">Email</span><span class="req-val">${esc(b.email) || '—'}</span></div>
+              <div class="req-field"><span class="req-label">Attendance</span><span class="req-val">${esc(b.attendance) || '—'}</span></div>
+              <div class="req-field"><span class="req-label">Event Date</span><span class="req-val">${fmtDate(b.event_date) || '—'}${b.event_end_date ? ' – ' + fmtDate(b.event_end_date) : ''}</span></div>
+              <div class="req-field"><span class="req-label">Requested Times</span><span class="req-val">${times}</span></div>
+              <div class="req-field req-full"><span class="req-label">Facilities Requested</span><span class="req-val">${esc(b.facilities) || '—'}</span></div>
+              <div class="req-field req-full"><span class="req-label">Notes from Requestor</span><span class="req-val">${esc(b.requestor_notes) || '—'}</span></div>
+            </div>
+          </div>
+
+          <form id="staff-form">
+
+            <div class="staff-section">
+              <div class="staff-section-title">Status &amp; Assignment</div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Booking Status</label>
+                  <select name="status" onchange="syncBadge(this.value)">
+                    ${['Pending','In Discussion','Confirmed','Deposit Received','Declined','Cancelled','Completed']
+                      .map(s => `<option${b.status === s ? ' selected' : ''}>${s}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="fg">
+                  <label>Hall Contact Assigned</label>
+                  <input type="text" name="assigned_to" value="${esc(b.assigned_to)}" placeholder="Name of hall rep">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Internal Notes</label>
+                <textarea name="internal_notes" placeholder="Notes visible to hall staff only…">${esc(b.internal_notes)}</textarea>
+              </div>
+            </div>
+
+            <div class="staff-section">
+              <div class="staff-section-title">Financials</div>
+              <div class="fg-row-3">
+                <div class="fg">
+                  <label>Rental Fee ($)</label>
+                  <input type="number" name="rental_fee" value="${esc(b.rental_fee)}" placeholder="0.00" step="0.01">
+                </div>
+                <div class="fg">
+                  <label>Deposit Required</label>
+                  <select name="deposit_required">
+                    <option value="">—</option>
+                    <option${b.deposit_required === 'Yes' ? ' selected' : ''}>Yes</option>
+                    <option${b.deposit_required === 'No'  ? ' selected' : ''}>No</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label>Deposit Amount ($)</label>
+                  <input type="number" name="deposit_amount" value="${esc(b.deposit_amount)}" placeholder="0.00" step="0.01">
+                </div>
+              </div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Deposit Received Date</label>
+                  <input type="date" name="deposit_received" value="${esc(b.deposit_received)}">
+                </div>
+                <div class="fg">
+                  <label>Final Payment Due</label>
+                  <input type="date" name="final_due" value="${esc(b.final_due)}">
+                </div>
+              </div>
+              <div class="fg" style="max-width:200px;">
+                <label>Final Payment Received</label>
+                <input type="date" name="final_received" value="${esc(b.final_received)}">
+              </div>
+            </div>
+
+            <div class="staff-section">
+              <div class="staff-section-title">Hall Setup &amp; Logistics</div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Setup Date / Time</label>
+                  <input type="text" name="setup_time" value="${esc(b.setup_time)}" placeholder="e.g. Jul 18 @ 3:00 PM">
+                </div>
+                <div class="fg">
+                  <label>Teardown By</label>
+                  <input type="text" name="teardown_time" value="${esc(b.teardown_time)}" placeholder="e.g. Jul 20 @ noon">
+                </div>
+              </div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Tables Required</label>
+                  <input type="text" name="tables" value="${esc(b.tables)}" placeholder="e.g. 8 × 8ft banquet">
+                </div>
+                <div class="fg">
+                  <label>Chairs Required</label>
+                  <input type="text" name="chairs" value="${esc(b.chairs)}" placeholder="e.g. 65 chairs">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Kitchen</label>
+                <div class="yn-toggle">
+                  <select name="kitchen_yn">
+                    <option value="">—</option>
+                    <option${kitchen.yn === 'Yes' ? ' selected' : ''}>Yes</option>
+                    <option${kitchen.yn === 'No'  ? ' selected' : ''}>No</option>
+                  </select>
+                  <input class="yn-detail" type="text" name="kitchen_detail" value="${esc(kitchen.detail)}" placeholder="Details (caterer name, access needed, etc.)">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Bar / Alcohol Service</label>
+                <div class="yn-toggle">
+                  <select name="bar_yn">
+                    <option value="">—</option>
+                    <option${bar.yn === 'Yes' ? ' selected' : ''}>Yes</option>
+                    <option${bar.yn === 'No'  ? ' selected' : ''}>No</option>
+                  </select>
+                  <input class="yn-detail" type="text" name="bar_detail" value="${esc(bar.detail)}" placeholder="Licence # or details">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Stage</label>
+                <div class="yn-toggle">
+                  <select name="stage_yn">
+                    <option value="">—</option>
+                    <option${stage.yn === 'Yes' ? ' selected' : ''}>Yes</option>
+                    <option${stage.yn === 'No'  ? ' selected' : ''}>No</option>
+                  </select>
+                  <input class="yn-detail" type="text" name="stage_detail" value="${esc(stage.detail)}" placeholder="Configuration or notes">
+                </div>
+              </div>
+              <div class="fg">
+                <label>AV / Sound</label>
+                <div class="yn-toggle">
+                  <select name="av_yn">
+                    <option value="">—</option>
+                    <option${av.yn === 'Yes' ? ' selected' : ''}>Yes</option>
+                    <option${av.yn === 'No'  ? ' selected' : ''}>No</option>
+                  </select>
+                  <input class="yn-detail" type="text" name="av_detail" value="${esc(av.detail)}" placeholder="Requirements or notes">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Parking Notes</label>
+                <input type="text" name="parking_notes" value="${esc(b.parking_notes)}" placeholder="e.g. overflow at school lot, shuttle arranged">
+              </div>
+              <div class="fg">
+                <label>Cleaning / Post-Event Requirements</label>
+                <input type="text" name="cleaning_notes" value="${esc(b.cleaning_notes)}" placeholder="e.g. client responsible, hall cleaning fee included">
+              </div>
+              <div class="fg">
+                <label>Special Conditions / Agreements</label>
+                <textarea name="special_conditions" placeholder="Any conditions discussed and agreed upon…" style="min-height:70px;">${esc(b.special_conditions)}</textarea>
+              </div>
+            </div>
+
+            <div class="staff-section">
+              <div class="staff-section-title">Communication &amp; Contracts</div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>First Contact Date</label>
+                  <input type="date" name="first_contact" value="${esc(b.first_contact)}">
+                </div>
+                <div class="fg">
+                  <label>Contact Method</label>
+                  <select name="contact_method">
+                    <option value="">—</option>
+                    ${['Phone','Email','In person','Text'].map(v =>
+                      `<option${b.contact_method === v ? ' selected' : ''}>${v}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Contract / Agreement Sent</label>
+                  <input type="date" name="contract_sent" value="${esc(b.contract_sent)}">
+                </div>
+                <div class="fg">
+                  <label>Contract Signed Date</label>
+                  <input type="date" name="contract_signed" value="${esc(b.contract_signed)}">
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="save-bar">
+          <button class="btn-save" id="save-btn" onclick="saveBooking()">Save Changes</button>
+          <button class="btn-cancel" type="button" onclick="openBooking('${b.booking_id}')">Discard</button>
+          <span class="save-note" id="save-note">${b.last_updated ? 'Last saved: ' + fmtDate(b.last_updated) : 'Not yet saved'}</span>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    function syncBadge(val) {
       const hb = document.getElementById('header-badge');
+      if (!hb) return;
       hb.className = 'badge ' + (BADGE_CLASSES[val] || 'badge-pending');
       hb.textContent = val;
     }
 
-    function openBooking(id) {
-      document.querySelectorAll('.booking-item').forEach(el => el.classList.remove('active'));
-      event.currentTarget.classList.add('active');
-      // In real implementation: load the row data and populate the form
+    function combineYn(yn, detail) {
+      if (!yn) return '';
+      if (yn === 'Yes' && detail) return `Yes – ${detail}`;
+      return yn;
     }
 
-    function saveBooking(e) {
-      e.preventDefault();
-      const saveNote = document.querySelector('.save-note');
-      saveNote.textContent = 'Saved just now ✓';
-      saveNote.style.color = '#27ae60';
-      setTimeout(() => { saveNote.textContent = 'Last saved: just now'; saveNote.style.color = '#999'; }, 3000);
+    async function saveBooking() {
+      if (!activeBooking) return;
+      const token = getToken();
+      if (!token) { setSaveNote('Please enter your token first.', 'err'); return; }
+
+      const form    = document.getElementById('staff-form');
+      const saveBtn = document.getElementById('save-btn');
+      saveBtn.disabled = true;
+      setSaveNote('Saving…', '');
+
+      const fd = form.elements;
+      const payload = {
+        action:             'booking-update',
+        token:              token,
+        booking_id:         activeBooking.booking_id,
+        status:             fd['status'].value,
+        assigned_to:        fd['assigned_to'].value.trim(),
+        internal_notes:     fd['internal_notes'].value.trim(),
+        rental_fee:         fd['rental_fee'].value,
+        deposit_required:   fd['deposit_required'].value,
+        deposit_amount:     fd['deposit_amount'].value,
+        deposit_received:   fd['deposit_received'].value,
+        final_due:          fd['final_due'].value,
+        final_received:     fd['final_received'].value,
+        setup_time:         fd['setup_time'].value.trim(),
+        teardown_time:      fd['teardown_time'].value.trim(),
+        tables:             fd['tables'].value.trim(),
+        chairs:             fd['chairs'].value.trim(),
+        kitchen:            combineYn(fd['kitchen_yn'].value, fd['kitchen_detail'].value.trim()),
+        bar:                combineYn(fd['bar_yn'].value, fd['bar_detail'].value.trim()),
+        stage:              combineYn(fd['stage_yn'].value, fd['stage_detail'].value.trim()),
+        av:                 combineYn(fd['av_yn'].value, fd['av_detail'].value.trim()),
+        parking_notes:      fd['parking_notes'].value.trim(),
+        cleaning_notes:     fd['cleaning_notes'].value.trim(),
+        special_conditions: fd['special_conditions'].value.trim(),
+        first_contact:      fd['first_contact'].value,
+        contact_method:     fd['contact_method'].value,
+        contract_sent:      fd['contract_sent'].value,
+        contract_signed:    fd['contract_signed'].value,
+        updated_by:         'Staff'
+      };
+
+      try {
+        const resp   = await fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await resp.json();
+        if (result.status === 'ok') {
+          // Update local data so re-renders reflect the change
+          Object.assign(activeBooking, {
+            status: payload.status, assigned_to: payload.assigned_to,
+            internal_notes: payload.internal_notes, last_updated: new Date().toISOString()
+          });
+          renderList();
+          setSaveNote('Saved ✓', 'ok');
+          setTimeout(() => setSaveNote('Last saved: just now', ''), 3000);
+        } else {
+          setSaveNote('Error: ' + result.message, 'err');
+        }
+      } catch (err) {
+        setSaveNote('Could not save — check your connection.', 'err');
+      } finally {
+        saveBtn.disabled = false;
+      }
     }
 
-    function filterList(status) {
-      // In real implementation: filter the booking list by status
+    function setSaveNote(msg, type) {
+      const el = document.getElementById('save-note');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'save-note' + (type ? ' ' + type : '');
     }
+
+    // Auto-load if token already saved
+    if (saved) loadBookings();
   </script>
 
 </body>
