@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<!-- MOCKUP ONLY — not wired to any backend -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Booking Management — Boisdale Fire Station 34 [MOCKUP]</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    /* ── Mockup banner ─────────────────────────────────────────── */
+    .mockup-banner {
+      background: #f39c12;
+      color: #fff;
+      text-align: center;
+      padding: .5rem 1rem;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    body { font-family: 'Trebuchet MS', sans-serif; }
+
+    /* ── Page layout ───────────────────────────────────────────── */
+    .manage-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 4rem;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .manage-wrap { grid-template-columns: 1fr; }
+      .detail-panel { display: none; }
+      .detail-panel.mobile-show { display: block; }
+    }
+
+    /* ── Page header ───────────────────────────────────────────── */
+    .page-header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem .5rem;
+    }
+    .page-header h1 { font-size: 1.4rem; margin-bottom: .25rem; }
+    .page-header p { color: #666; font-size: .9rem; }
+
+    /* ── Booking list panel ────────────────────────────────────── */
+    .list-panel {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .list-header {
+      background: var(--primary);
+      color: #fff;
+      padding: .75rem 1rem;
+      font-weight: 700;
+      font-size: .9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .list-filter {
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      padding: .5rem .75rem;
+    }
+    .list-filter select {
+      width: 100%;
+      padding: .35rem .5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: .85rem;
+      font-family: inherit;
+    }
+    .booking-item {
+      padding: .85rem 1rem;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .booking-item:last-child { border-bottom: none; }
+    .booking-item:hover { background: #f9f9f9; }
+    .booking-item.active { background: #eaf3ec; border-left: 3px solid var(--primary); padding-left: calc(1rem - 3px); }
+    .booking-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: .5rem;
+    }
+    .booking-id { font-size: .75rem; color: #999; font-weight: 600; }
+    .booking-name { font-weight: 700; font-size: .9rem; color: #222; }
+    .booking-event { font-size: .82rem; color: #555; margin-top: .1rem; }
+    .booking-date { font-size: .8rem; color: #777; margin-top: .1rem; }
+
+    /* Status badges */
+    .badge {
+      display: inline-block;
+      padding: .2rem .55rem;
+      border-radius: 12px;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-pending    { background: #fef9e7; color: #b7770d; border: 1px solid #f7dc6f; }
+    .badge-discussion { background: #eaf2fb; color: #1a5276; border: 1px solid #85c1e9; }
+    .badge-confirmed  { background: #eafaf1; color: #1e8449; border: 1px solid #82e0aa; }
+    .badge-deposit    { background: #e8daef; color: #6c3483; border: 1px solid #c39bd3; }
+    .badge-declined   { background: #fdedec; color: #943126; border: 1px solid #f1948a; }
+    .badge-completed  { background: #f2f3f4; color: #555; border: 1px solid #ccc; }
+    .badge-cancelled  { background: #f2f3f4; color: #888; border: 1px solid #ddd; }
+
+    /* ── Detail panel ──────────────────────────────────────────── */
+    .detail-panel {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .detail-header {
+      background: var(--primary-dk);
+      color: #fff;
+      padding: .85rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .detail-header h2 { font-size: 1rem; margin: 0; }
+    .detail-header .bid { font-size: .8rem; opacity: .8; }
+
+    .detail-body { padding: 1.25rem; }
+
+    /* Read-only request block */
+    .request-block {
+      background: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    .request-block-title {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: #777;
+      margin-bottom: .75rem;
+    }
+    .req-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .35rem .75rem;
+    }
+    @media (max-width: 600px) { .req-grid { grid-template-columns: 1fr; } }
+    .req-field { font-size: .85rem; }
+    .req-label { color: #888; font-size: .78rem; display: block; }
+    .req-val { color: #222; font-weight: 600; }
+    .req-full { grid-column: 1 / -1; }
+
+    /* Form sections */
+    .staff-section {
+      margin-bottom: 1.75rem;
+    }
+    .staff-section-title {
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: .3rem;
+      margin-bottom: 1rem;
+    }
+    .fg { margin-bottom: .9rem; }
+    .fg label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: .3rem;
+      color: #444;
+    }
+    .fg input[type="text"],
+    .fg input[type="date"],
+    .fg input[type="number"],
+    .fg select,
+    .fg textarea {
+      width: 100%;
+      padding: .5rem .65rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: .9rem;
+      font-family: inherit;
+    }
+    .fg input:focus, .fg select:focus, .fg textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,92,42,.1);
+    }
+    .fg textarea { min-height: 80px; resize: vertical; }
+    .fg-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    .fg-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .75rem;
+    }
+    @media (max-width: 600px) {
+      .fg-row, .fg-row-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Yes/No toggles */
+    .yn-toggle {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+    .yn-toggle select {
+      width: auto;
+      min-width: 80px;
+    }
+    .yn-detail { flex: 1; }
+
+    /* Save bar */
+    .save-bar {
+      background: #f5f5f5;
+      border-top: 1px solid #ddd;
+      padding: 1rem 1.25rem;
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+    }
+    .btn-save {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: .65rem 1.75rem;
+      font-size: .9rem;
+      font-family: inherit;
+      font-weight: 700;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-save:hover { background: var(--primary-dk); }
+    .btn-cancel {
+      background: none;
+      color: #666;
+      border: 1px solid #ccc;
+      padding: .65rem 1.25rem;
+      font-size: .9rem;
+      font-family: inherit;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .save-note { font-size: .8rem; color: #999; margin-left: auto; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #aaa;
+    }
+    .empty-state i { display: block; margin: 0 auto 1rem; }
+    .empty-state p { font-size: .9rem; }
+
+    /* New booking badge */
+    .new-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: #e74c3c;
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="page-wrap">
+
+  <div class="mockup-banner">⚠ DESIGN MOCKUP — Not connected to any backend — For approval only</div>
+
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Boisdale Fire Station 34</div>
+      <nav>
+        <a href="upload.html">Post Notice</a>
+        <a href="manage.html">Manage Posts</a>
+        <a href="events-manage.html">Events</a>
+        <a href="booking-manage.html" class="active">Bookings</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <h1><i data-lucide="calendar-check" style="vertical-align:-4px; width:22px; height:22px;"></i> Hall Booking Management</h1>
+    <p>Review and manage booking requests. Click a request to open the full detail form.</p>
+  </div>
+
+  <div class="manage-wrap">
+
+    <!-- ── Left: booking list ───────────────────────────────────── -->
+    <div class="list-panel">
+      <div class="list-header">
+        <span>Booking Requests</span>
+        <span style="font-size:.78rem; opacity:.8;">5 requests</span>
+      </div>
+      <div class="list-filter">
+        <select onchange="filterList(this.value)">
+          <option value="all">All Statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="In Discussion">In Discussion</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Deposit Received">Deposit Received</option>
+          <option value="Completed">Completed</option>
+          <option value="Declined">Declined</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- Sample bookings -->
+      <div class="booking-item active" onclick="openBooking('BK-2026-005')">
+        <div class="booking-item-top">
+          <div>
+            <div class="booking-id">BK-2026-005</div>
+            <div class="booking-name">Sarah MacDonald <span class="new-dot" title="New"></span></div>
+          </div>
+          <span class="badge badge-pending">Pending</span>
+        </div>
+        <div class="booking-event">Birthday Party — ~60 guests</div>
+        <div class="booking-date">Jul 19, 2026 &nbsp;·&nbsp; Submitted Jun 3</div>
+      </div>
+
+      <div class="booking-item" onclick="openBooking('BK-2026-004')">
+        <div class="booking-item-top">
+          <div>
+            <div class="booking-id">BK-2026-004</div>
+            <div class="booking-name">Cape Breton Fiddle Society</div>
+          </div>
+          <span class="badge badge-confirmed">Confirmed</span>
+        </div>
+        <div class="booking-event">Summer Ceilidh & Dance</div>
+        <div class="booking-date">Aug 2, 2026 &nbsp;·&nbsp; Submitted May 28</div>
+      </div>
+
+      <div class="booking-item" onclick="openBooking('BK-2026-003')">
+        <div class="booking-item-top">
+          <div>
+            <div class="booking-id">BK-2026-003</div>
+            <div class="booking-name">Donnie & Anne MacNeil</div>
+          </div>
+          <span class="badge badge-deposit">Deposit Rcvd</span>
+        </div>
+        <div class="booking-event">Wedding Reception</div>
+        <div class="booking-date">Sep 6, 2026 &nbsp;·&nbsp; Submitted May 10</div>
+      </div>
+
+      <div class="booking-item" onclick="openBooking('BK-2026-002')">
+        <div class="booking-item-top">
+          <div>
+            <div class="booking-id">BK-2026-002</div>
+            <div class="booking-name">Boisdale Parent Council</div>
+          </div>
+          <span class="badge badge-discussion">In Discussion</span>
+        </div>
+        <div class="booking-event">Year-End School Banquet</div>
+        <div class="booking-date">Jun 27, 2026 &nbsp;·&nbsp; Submitted May 20</div>
+      </div>
+
+      <div class="booking-item" onclick="openBooking('BK-2026-001')">
+        <div class="booking-item-top">
+          <div>
+            <div class="booking-id">BK-2026-001</div>
+            <div class="booking-name">Seniors Drop-In Group</div>
+          </div>
+          <span class="badge badge-completed">Completed</span>
+        </div>
+        <div class="booking-event">Monthly Luncheon</div>
+        <div class="booking-date">May 15, 2026 &nbsp;·&nbsp; Submitted Apr 30</div>
+      </div>
+
+    </div>
+
+    <!-- ── Right: detail form ────────────────────────────────────── -->
+    <div class="detail-panel" id="detail-panel">
+
+      <div class="detail-header">
+        <div>
+          <div class="bid">BK-2026-005 &nbsp;·&nbsp; Submitted Jun 3, 2026</div>
+          <h2>Sarah MacDonald — Birthday Party</h2>
+        </div>
+        <span class="badge badge-pending" id="header-badge">Pending</span>
+      </div>
+
+      <div class="detail-body">
+
+        <!-- Read-only request info -->
+        <div class="request-block">
+          <div class="request-block-title">Requestor Submission (read-only)</div>
+          <div class="req-grid">
+            <div class="req-field">
+              <span class="req-label">Name</span>
+              <span class="req-val">Sarah MacDonald</span>
+            </div>
+            <div class="req-field">
+              <span class="req-label">Phone</span>
+              <span class="req-val">(902) 555-0187</span>
+            </div>
+            <div class="req-field">
+              <span class="req-label">Email</span>
+              <span class="req-val">sarah.macdonald@example.com</span>
+            </div>
+            <div class="req-field">
+              <span class="req-label">Attendance</span>
+              <span class="req-val">~60 guests</span>
+            </div>
+            <div class="req-field">
+              <span class="req-label">Event Date</span>
+              <span class="req-val">Saturday, July 19, 2026</span>
+            </div>
+            <div class="req-field">
+              <span class="req-label">Requested Times</span>
+              <span class="req-val">2:00 PM – 11:00 PM</span>
+            </div>
+            <div class="req-field req-full">
+              <span class="req-label">Facilities Requested</span>
+              <span class="req-val">Kitchen, Tables &amp; chairs, Bar service, AV/Sound</span>
+            </div>
+            <div class="req-field req-full">
+              <span class="req-label">Notes from Requestor</span>
+              <span class="req-val">50th birthday celebration. Need to set up the afternoon before if possible. Will hire own caterer.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Staff sections -->
+        <form id="staff-form" onsubmit="saveBooking(event)">
+
+          <!-- Status & Assignment -->
+          <div class="staff-section">
+            <div class="staff-section-title">Status &amp; Assignment</div>
+            <div class="fg-row">
+              <div class="fg">
+                <label>Booking Status</label>
+                <select name="status" id="status-select" onchange="updateBadge(this.value)">
+                  <option value="Pending" selected>Pending</option>
+                  <option value="In Discussion">In Discussion</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Deposit Received">Deposit Received</option>
+                  <option value="Declined">Declined</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Hall Contact Assigned</label>
+                <input type="text" name="assigned_to" placeholder="Name of hall rep">
+              </div>
+            </div>
+            <div class="fg">
+              <label>Internal Notes</label>
+              <textarea name="internal_notes" placeholder="Notes visible to hall staff only…"></textarea>
+            </div>
+          </div>
+
+          <!-- Financials -->
+          <div class="staff-section">
+            <div class="staff-section-title">Financials</div>
+            <div class="fg-row-3">
+              <div class="fg">
+                <label>Rental Fee ($)</label>
+                <input type="number" name="rental_fee" placeholder="0.00" step="0.01">
+              </div>
+              <div class="fg">
+                <label>Deposit Required</label>
+                <select name="deposit_required">
+                  <option value="">—</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Deposit Amount ($)</label>
+                <input type="number" name="deposit_amount" placeholder="0.00" step="0.01">
+              </div>
+            </div>
+            <div class="fg-row">
+              <div class="fg">
+                <label>Deposit Received Date</label>
+                <input type="date" name="deposit_received">
+              </div>
+              <div class="fg">
+                <label>Final Payment Due</label>
+                <input type="date" name="final_due">
+              </div>
+            </div>
+            <div class="fg" style="max-width:200px;">
+              <label>Final Payment Received</label>
+              <input type="date" name="final_received">
+            </div>
+          </div>
+
+          <!-- Hall Setup -->
+          <div class="staff-section">
+            <div class="staff-section-title">Hall Setup &amp; Logistics</div>
+            <div class="fg-row">
+              <div class="fg">
+                <label>Setup Date / Time</label>
+                <input type="text" name="setup_time" placeholder="e.g. Jul 18 @ 3:00 PM">
+              </div>
+              <div class="fg">
+                <label>Teardown By</label>
+                <input type="text" name="teardown_time" placeholder="e.g. Jul 20 @ noon">
+              </div>
+            </div>
+            <div class="fg-row">
+              <div class="fg">
+                <label>Tables Required</label>
+                <input type="text" name="tables" placeholder="e.g. 8 × 8ft banquet">
+              </div>
+              <div class="fg">
+                <label>Chairs Required</label>
+                <input type="text" name="chairs" placeholder="e.g. 65 chairs">
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Kitchen</label>
+              <div class="yn-toggle">
+                <select name="kitchen_yn" style="width:90px;">
+                  <option value="">—</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+                <input class="yn-detail" type="text" name="kitchen_detail" placeholder="Details (caterer name, access needed, etc.)">
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Bar / Alcohol Service</label>
+              <div class="yn-toggle">
+                <select name="bar_yn" style="width:90px;">
+                  <option value="">—</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+                <input class="yn-detail" type="text" name="bar_detail" placeholder="Licence # or details">
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Stage</label>
+              <div class="yn-toggle">
+                <select name="stage_yn" style="width:90px;">
+                  <option value="">—</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+                <input class="yn-detail" type="text" name="stage_detail" placeholder="Configuration or notes">
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>AV / Sound</label>
+              <div class="yn-toggle">
+                <select name="av_yn" style="width:90px;">
+                  <option value="">—</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+                <input class="yn-detail" type="text" name="av_detail" placeholder="Requirements or notes">
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Parking Notes</label>
+              <input type="text" name="parking_notes" placeholder="e.g. overflow at school lot, shuttle arranged">
+            </div>
+
+            <div class="fg">
+              <label>Cleaning / Post-Event Requirements</label>
+              <input type="text" name="cleaning_notes" placeholder="e.g. client responsible, hall cleaning fee included">
+            </div>
+
+            <div class="fg">
+              <label>Special Conditions / Agreements</label>
+              <textarea name="special_conditions" placeholder="Any conditions discussed and agreed upon…" style="min-height:70px;"></textarea>
+            </div>
+          </div>
+
+          <!-- Communication -->
+          <div class="staff-section">
+            <div class="staff-section-title">Communication &amp; Contracts</div>
+            <div class="fg-row">
+              <div class="fg">
+                <label>First Contact Date</label>
+                <input type="date" name="first_contact_date">
+              </div>
+              <div class="fg">
+                <label>Contact Method</label>
+                <select name="contact_method">
+                  <option value="">—</option>
+                  <option value="Phone">Phone</option>
+                  <option value="Email">Email</option>
+                  <option value="In person">In person</option>
+                  <option value="Text">Text</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg-row">
+              <div class="fg">
+                <label>Contract / Agreement Sent</label>
+                <input type="date" name="contract_sent">
+              </div>
+              <div class="fg">
+                <label>Contract Signed Date</label>
+                <input type="date" name="contract_signed">
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div><!-- /detail-body -->
+
+      <div class="save-bar">
+        <button class="btn-save" onclick="saveBooking(event)">Save Changes</button>
+        <button class="btn-cancel" type="button">Discard</button>
+        <span class="save-note">Last saved: never</span>
+      </div>
+
+    </div><!-- /detail-panel -->
+
+  </div><!-- /manage-wrap -->
+
+  <script>
+    lucide.createIcons();
+
+    const BADGE_CLASSES = {
+      'Pending':         'badge-pending',
+      'In Discussion':   'badge-discussion',
+      'Confirmed':       'badge-confirmed',
+      'Deposit Received':'badge-deposit',
+      'Declined':        'badge-declined',
+      'Cancelled':       'badge-cancelled',
+      'Completed':       'badge-completed'
+    };
+
+    function updateBadge(val) {
+      const hb = document.getElementById('header-badge');
+      hb.className = 'badge ' + (BADGE_CLASSES[val] || 'badge-pending');
+      hb.textContent = val;
+    }
+
+    function openBooking(id) {
+      document.querySelectorAll('.booking-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      // In real implementation: load the row data and populate the form
+    }
+
+    function saveBooking(e) {
+      e.preventDefault();
+      const saveNote = document.querySelector('.save-note');
+      saveNote.textContent = 'Saved just now ✓';
+      saveNote.style.color = '#27ae60';
+      setTimeout(() => { saveNote.textContent = 'Last saved: just now'; saveNote.style.color = '#999'; }, 3000);
+    }
+
+    function filterList(status) {
+      // In real implementation: filter the booking list by status
+    }
+  </script>
+
+</body>
+</html>

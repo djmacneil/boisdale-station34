@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<!-- MOCKUP ONLY — not wired to any backend -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book the Hall — Boisdale Fire Station 34 [MOCKUP]</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+  <style>
+    /* ── Mockup banner ─────────────────────────────────────────── */
+    .mockup-banner {
+      background: #f39c12;
+      color: #fff;
+      text-align: center;
+      padding: .5rem 1rem;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    /* ── Form layout ───────────────────────────────────────────── */
+    .booking-container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .booking-intro {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: .95rem;
+      color: #444;
+    }
+    .booking-intro p { margin: 0; line-height: 1.6; }
+    .booking-intro strong { color: var(--primary); }
+
+    .form-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 2rem;
+    }
+    .form-section {
+      margin-bottom: 2rem;
+    }
+    .form-section-title {
+      font-family: 'Trebuchet MS', sans-serif;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: .35rem;
+      margin-bottom: 1.25rem;
+    }
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: .35rem;
+      font-size: .9rem;
+      color: #333;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+    .form-group label .req {
+      color: #c0392b;
+      margin-left: 2px;
+    }
+    .form-group label .opt {
+      color: #999;
+      font-weight: 400;
+      font-size: .8rem;
+      margin-left: 4px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="date"],
+    .form-group input[type="time"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: .6rem .75rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color .15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,92,42,.12);
+    }
+    .form-group textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 540px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Checkboxes */
+    .check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .5rem .75rem;
+    }
+    @media (max-width: 540px) { .check-grid { grid-template-columns: 1fr; } }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .93rem;
+      color: #333;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+    .check-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Hint text */
+    .field-hint {
+      font-size: .78rem;
+      color: #888;
+      margin-top: .3rem;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+
+    /* Submit */
+    .form-submit {
+      margin-top: .5rem;
+    }
+    .btn-submit {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: .8rem 2.5rem;
+      font-size: 1rem;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .15s;
+      width: 100%;
+    }
+    .btn-submit:hover { background: var(--primary-dk); }
+    .form-note {
+      font-size: .8rem;
+      color: #888;
+      margin-top: .75rem;
+      text-align: center;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+
+    /* Success state (demo) */
+    .success-box {
+      display: none;
+      background: #eafaf1;
+      border: 1px solid #27ae60;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .success-box.show { display: block; }
+    .success-box h3 { color: #27ae60; margin-bottom: .5rem; font-family: 'Trebuchet MS', sans-serif; }
+    .success-box p { color: #444; font-size: .95rem; margin: 0; }
+  </style>
+</head>
+<body class="page-wrap">
+
+  <div class="mockup-banner">⚠ DESIGN MOCKUP — Not connected to any backend — For approval only</div>
+
+  <header id="site-header">
+    <div class="header-inner">
+      <div class="site-title">🔥 Boisdale Fire Station 34</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="notices.html">Notices</a>
+        <a href="meetings.html">Fire Dept.</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="projects.html">Projects</a>
+        <a href="firedept.html">Minutes</a>
+        <a href="community.html">Community</a>
+        <a href="book-hall.html" class="active">Book the Hall</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="booking-container">
+
+      <h1 class="page-title" style="margin-bottom:1rem;">
+        <i data-lucide="calendar-check" style="vertical-align:-4px; width:28px; height:28px;"></i>
+        Book the Hall
+      </h1>
+
+      <div class="booking-intro">
+        <p>To request use of the <strong>Boisdale Community Hall</strong>, complete the form below.
+        A hall representative will contact you to confirm availability and discuss details.
+        This form is a <strong>request only</strong> — your booking is not confirmed until you
+        receive written confirmation.</p>
+      </div>
+
+      <div class="form-card" id="booking-form-card">
+        <form id="booking-form" onsubmit="handleSubmit(event)">
+
+          <!-- Section 1: Contact Info -->
+          <div class="form-section">
+            <div class="form-section-title">Your Contact Information</div>
+            <div class="form-group">
+              <label>Full Name <span class="req">*</span></label>
+              <input type="text" name="name" placeholder="Jane MacNeil" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email Address <span class="req">*</span></label>
+                <input type="email" name="email" placeholder="jane@example.com" required>
+              </div>
+              <div class="form-group">
+                <label>Phone Number <span class="req">*</span></label>
+                <input type="tel" name="phone" placeholder="(902) 555-0100" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Event Details -->
+          <div class="form-section">
+            <div class="form-section-title">Event Details</div>
+            <div class="form-group">
+              <label>Event Name / Brief Description <span class="req">*</span></label>
+              <input type="text" name="event_name" placeholder="e.g. Birthday Party, Community Meeting, Wedding Reception" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Event Date <span class="req">*</span></label>
+                <input type="date" name="event_date" required>
+              </div>
+              <div class="form-group">
+                <label>End Date <span class="opt">(if multi-day)</span></label>
+                <input type="date" name="event_end_date">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Approximate Start Time</label>
+                <input type="time" name="start_time">
+                <div class="field-hint">Including setup time if needed</div>
+              </div>
+              <div class="form-group">
+                <label>Approximate End Time</label>
+                <input type="time" name="end_time">
+                <div class="field-hint">Including cleanup/teardown</div>
+              </div>
+            </div>
+            <div class="form-group" style="max-width:200px;">
+              <label>Estimated Attendance</label>
+              <input type="number" name="attendance" min="1" max="500" placeholder="e.g. 75">
+            </div>
+          </div>
+
+          <!-- Section 3: Facilities -->
+          <div class="form-section">
+            <div class="form-section-title">Facilities / Equipment Needed</div>
+            <p class="field-hint" style="margin-bottom:.75rem; font-size:.85rem; color:#666;">
+              Check all that apply — these help us prepare. Nothing is confirmed at this stage.
+            </p>
+            <div class="check-grid">
+              <label class="check-item">
+                <input type="checkbox" name="need_kitchen" value="Kitchen">
+                Kitchen / food prep area
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="need_tables" value="Tables &amp; chairs">
+                Tables and chairs
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="need_bar" value="Bar service">
+                Bar / alcohol service
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="need_stage" value="Stage">
+                Stage
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="need_av" value="AV/Sound">
+                AV / sound system
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="need_parking" value="Large group parking">
+                Parking for large group
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 4: Notes -->
+          <div class="form-section">
+            <div class="form-section-title">Additional Notes</div>
+            <div class="form-group">
+              <label>Anything else we should know? <span class="opt">(optional)</span></label>
+              <textarea name="notes" placeholder="Special requirements, accessibility needs, questions, etc."></textarea>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="form-submit">
+            <button type="submit" class="btn-submit">Submit Booking Request</button>
+            <p class="form-note">
+              Your request will be reviewed and a hall representative will be in touch within 2–3 business days.
+            </p>
+          </div>
+
+        </form>
+
+        <!-- Success message (shown after submit in demo) -->
+        <div class="success-box" id="success-box">
+          <h3>✓ Request Submitted!</h3>
+          <p>Thank you — your booking request has been received. A hall representative will
+          contact you at the email or phone number you provided within 2–3 business days.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="background:#1a1a1a; color:#aaa; text-align:center; padding:1.25rem; font-size:.85rem; font-family:'Trebuchet MS',sans-serif;">
+    Boisdale Fire Station 34 &mdash; Nova Scotia
+  </footer>
+
+  <script>
+    lucide.createIcons();
+    function handleSubmit(e) {
+      e.preventDefault();
+      // Demo: show success message
+      document.getElementById('booking-form').style.display = 'none';
+      document.getElementById('success-box').classList.add('show');
+    }
+  </script>
+
+</body>
+</html>
