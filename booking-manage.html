@@ -749,15 +749,16 @@
             status: payload.status, assigned_to: payload.assigned_to,
             internal_notes: payload.internal_notes, last_updated: new Date().toISOString()
           });
+          activeBooking = null;
           renderList();
-          setSaveNote('Saved ✓', 'ok');
-          setTimeout(() => setSaveNote('Last saved: just now', ''), 3000);
+          document.getElementById('detail-panel').innerHTML =
+            '<div class="detail-placeholder">Booking saved. Select another to continue.</div>';
         } else {
           setSaveNote('Error: ' + result.message, 'err');
+          saveBtn.disabled = false;
         }
       } catch (err) {
         setSaveNote('Could not save — check your connection.', 'err');
-      } finally {
         saveBtn.disabled = false;
       }
     }
