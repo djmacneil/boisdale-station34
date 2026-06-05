@@ -492,21 +492,63 @@
 
         <div class="detail-body">
 
-          <div class="request-block">
-            <div class="request-block-title">Requestor Submission (read-only)</div>
-            <div class="req-grid">
-              <div class="req-field"><span class="req-label">Name</span><span class="req-val">${esc(b.name)}</span></div>
-              <div class="req-field"><span class="req-label">Phone</span><span class="req-val">${esc(b.phone) || '—'}</span></div>
-              <div class="req-field"><span class="req-label">Email</span><span class="req-val">${esc(b.email) || '—'}</span></div>
-              <div class="req-field"><span class="req-label">Attendance</span><span class="req-val">${esc(b.attendance) || '—'}</span></div>
-              <div class="req-field"><span class="req-label">Event Date</span><span class="req-val">${fmtDate(b.event_date) || '—'}${b.event_end_date ? ' – ' + fmtDate(b.event_end_date) : ''}</span></div>
-              <div class="req-field"><span class="req-label">Requested Times</span><span class="req-val">${times}</span></div>
-              <div class="req-field req-full"><span class="req-label">Facilities Requested</span><span class="req-val">${esc(b.facilities) || '—'}</span></div>
-              <div class="req-field req-full"><span class="req-label">Notes from Requestor</span><span class="req-val">${esc(b.requestor_notes) || '—'}</span></div>
-            </div>
-          </div>
-
           <form id="staff-form">
+
+            <div class="staff-section">
+              <div class="staff-section-title">Booking Request Details</div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Name</label>
+                  <input type="text" name="name" value="${esc(b.name)}">
+                </div>
+                <div class="fg">
+                  <label>Phone</label>
+                  <input type="tel" name="phone" value="${esc(b.phone)}">
+                </div>
+              </div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Email</label>
+                  <input type="email" name="email" value="${esc(b.email)}">
+                </div>
+                <div class="fg">
+                  <label>Estimated Attendance</label>
+                  <input type="number" name="attendance" value="${esc(b.attendance)}" min="1">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Event Name / Description</label>
+                <input type="text" name="event_name" value="${esc(b.event_name)}">
+              </div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Event Date</label>
+                  <input type="date" name="event_date" value="${esc(b.event_date)}">
+                </div>
+                <div class="fg">
+                  <label>End Date</label>
+                  <input type="date" name="event_end_date" value="${esc(b.event_end_date)}">
+                </div>
+              </div>
+              <div class="fg-row">
+                <div class="fg">
+                  <label>Start Time</label>
+                  <input type="time" name="start_time" value="${esc(b.start_time)}">
+                </div>
+                <div class="fg">
+                  <label>End Time</label>
+                  <input type="time" name="end_time" value="${esc(b.end_time)}">
+                </div>
+              </div>
+              <div class="fg">
+                <label>Facilities Requested</label>
+                <input type="text" name="facilities" value="${esc(b.facilities)}">
+              </div>
+              <div class="fg">
+                <label>Notes from Requestor</label>
+                <textarea name="requestor_notes">${esc(b.requestor_notes)}</textarea>
+              </div>
+            </div>
 
             <div class="staff-section">
               <div class="staff-section-title">Status &amp; Assignment</div>
@@ -713,6 +755,17 @@
         action:             'booking-update',
         token:              token,
         booking_id:         activeBooking.booking_id,
+        name:               fd['name'].value.trim(),
+        email:              fd['email'].value.trim(),
+        phone:              fd['phone'].value.trim(),
+        event_name:         fd['event_name'].value.trim(),
+        event_date:         fd['event_date'].value,
+        event_end_date:     fd['event_end_date'].value,
+        start_time:         fd['start_time'].value,
+        end_time:           fd['end_time'].value,
+        attendance:         fd['attendance'].value,
+        facilities:         fd['facilities'].value.trim(),
+        requestor_notes:    fd['requestor_notes'].value.trim(),
         status:             fd['status'].value,
         assigned_to:        fd['assigned_to'].value.trim(),
         internal_notes:     fd['internal_notes'].value.trim(),

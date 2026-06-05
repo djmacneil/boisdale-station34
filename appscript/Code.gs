@@ -71,6 +71,17 @@ const BC = {
 // Staff-editable fields: maps payload key → column index.
 // Only these keys are accepted in a booking-update call.
 const STAFF_FIELDS = {
+  name:               BC.NAME,
+  email:              BC.EMAIL,
+  phone:              BC.PHONE,
+  event_name:         BC.EVENT_NAME,
+  event_date:         BC.EVENT_DATE,
+  event_end_date:     BC.EVENT_END_DATE,
+  start_time:         BC.START_TIME,
+  end_time:           BC.END_TIME,
+  attendance:         BC.ATTENDANCE,
+  facilities:         BC.FACILITIES,
+  requestor_notes:    BC.REQUESTOR_NOTES,
   status:             BC.STATUS,
   assigned_to:        BC.ASSIGNED_TO,
   internal_notes:     BC.INTERNAL_NOTES,
