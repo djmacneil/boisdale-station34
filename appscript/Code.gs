@@ -270,6 +270,60 @@ function doPost(e) {
       return output;
     }
 
+    // ── Post: edit ─────────────────────────────────────────────
+    if (data.action === 'edit') {
+      if (!data.sheetRow) {
+        output.setContent(JSON.stringify({ status: 'error', message: 'Missing field: sheetRow' }));
+        return output;
+      }
+
+      const required = ['category', 'date', 'title', 'body'];
+      for (const field of required) {
+        if (!data[field] || String(data[field]).trim() === '') {
+          output.setContent(JSON.stringify({ status: 'error', message: `Missing field: ${field}` }));
+          return output;
+        }
+      }
+
+      const ss    = SpreadsheetApp.openById(SHEET_ID);
+      const sheet = ss.getSheetByName(SHEET_TAB_NAME);
+      if (!sheet) {
+        output.setContent(JSON.stringify({ status: 'error', message: `Sheet tab "${SHEET_TAB_NAME}" not found.` }));
+        return output;
+      }
+
+      const sheetRow = data.sheetRow;
+      sheet.getRange(sheetRow, 2).setValue(data.date.trim());
+      sheet.getRange(sheetRow, 3).setValue(data.category.trim());
+      sheet.getRange(sheetRow, 4).setValue(data.title.trim());
+      sheet.getRange(sheetRow, 5).setValue(data.body.trim());
+      sheet.getRange(sheetRow, 9).setValue((data.start_date || '').trim());
+      sheet.getRange(sheetRow, 10).setValue((data.end_date || '').trim());
+
+      output.setContent(JSON.stringify({ status: 'ok', message: 'Post updated.' }));
+      return output;
+    }
+
+    // ── Post: delete ───────────────────────────────────────────
+    if (data.action === 'delete') {
+      if (!data.sheetRow) {
+        output.setContent(JSON.stringify({ status: 'error', message: 'Missing field: sheetRow' }));
+        return output;
+      }
+
+      const ss    = SpreadsheetApp.openById(SHEET_ID);
+      const sheet = ss.getSheetByName(SHEET_TAB_NAME);
+      if (!sheet) {
+        output.setContent(JSON.stringify({ status: 'error', message: `Sheet tab "${SHEET_TAB_NAME}" not found.` }));
+        return output;
+      }
+
+      sheet.deleteRow(data.sheetRow);
+
+      output.setContent(JSON.stringify({ status: 'ok', message: 'Post deleted.' }));
+      return output;
+    }
+
     // ── Booking: update (staff form) ──────────────────────────
     if (data.action === 'booking-update') {
       if (!data.booking_id) {
