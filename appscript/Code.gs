@@ -344,7 +344,13 @@ function doPost(e) {
       );
       const folder    = DriveApp.getFolderById(DRIVE_FOLDER_ID);
       const driveFile = folder.createFile(blob);
-      driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      try {
+        driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch (shareErr) {
+        // Non-owner callers may lack permission to change sharing on a file
+        // created in someone else's folder. The file still inherits the
+        // folder's sharing, so don't block post creation over this.
+      }
       fileUrl  = driveFile.getUrl();
       fileName = driveFile.getName();
       fileType = data.fileType;
