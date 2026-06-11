@@ -51,6 +51,12 @@ Posts are grouped by category then by Active/Future/Expired status. Classificati
 
 Key implementation detail: `addDailyRule()` / `addWeeklyRule()` / `addMonthlyRule()` / `addYearlyRule()` each return a `RecurrenceRule` object. The end condition methods (`times()`, `until()`) and `onlyOnWeekdays()` must be called on that `RecurrenceRule`, not on the parent `EventRecurrence`. Then pass the `EventRecurrence` to `createEventSeries()` / `createAllDayEventSeries()`. Weekday codes from the client (MO/TU/WE/TH/FR/SA/SU) must be mapped to `CalendarApp.Weekday.*` enum values.
 
+### Post Edit/Delete (manage.html)
+manage.html sends `action: 'edit'` and `action: 'delete'` for posts, both keyed on `sheetRow` (1-based row number, header = row 1). `edit` updates date/category/title/body/start_date/end_date columns in place and leaves FileURL/FileName/FileType untouched — manage.html does not support changing the attachment ("delete and re-post" is the workaround). `delete` calls `sheet.deleteRow(sheetRow)`. Both require the standard token check.
+
+### Drive Sharing on Uploaded Files
+`driveFile.setSharing(...)` after `folder.createFile(blob)` is wrapped in try/catch and treated as non-fatal. Even with deployment "Execute as: Me", a non-owner caller can successfully create a file in the shared Drive folder but can hit "Access denied: DriveApp" when changing that file's sharing settings. The file still inherits the parent folder's sharing, so a failed `setSharing()` should not block post creation.
+
 ### Code.gs Repo Sync
 `appscript/Code.gs` is the canonical source for the Apps Script. Any manual edits made directly in the Google Apps Script editor must be reflected back in Code.gs and committed. When diagnosing calendar bugs, always check Code.gs first — if it's out of date with the live script, the repo is not the source of truth.
 
@@ -69,6 +75,8 @@ GA4 tag `G-SKSZ174GDR` is in the `<head>` of every page. When adding new HTML pa
 - Recurring events require `createEventSeries()` / `createAllDayEventSeries()` — using `createEvent()` silently creates only a single occurrence with no error.
 - `CalendarApp.newRecurrence().addWeeklyRule()` returns a `RecurrenceRule`; call `onlyOnWeekdays()` and `times()` / `until()` on that object, not on the `EventRecurrence`.
 - Keep `appscript/Code.gs` in sync with the live Apps Script. If they diverge, debugging is unreliable.
+- `doPost` action blocks for `edit`/`delete` (or any new action) must exist explicitly — without one, the payload falls through to the generic post-create path, causing duplicate posts or "Missing field: category" errors.
+- `driveFile.setSharing()` can throw "Access denied: DriveApp" for non-owner callers even under "Execute as: Me" — wrap it in try/catch and don't let it block the rest of the operation.
 
 ## File Map (quick reference)
 - Config: `js/config.js`
@@ -84,3 +92,10 @@ Posts tab columns (0-indexed as used in JS):
 `[0]Timestamp [1]Date [2]Category [3]Title [4]Body [5]FileURL [6]FileName [7]FileType [8]StartDate [9]EndDate`
 
 Row 0 is the header row. `fetchPostsByCategory` skips it by detecting "timestamp" in the first cell.
+
+## Posting from non-authenticated browser
+Drive file URL format after upload
+After saving a file to Drive via DriveApp.createFile(), do not use driveFile.getUrl() to store the file URL. It returns a drive.google.com/file/d/FILE_ID/view?usp=drivesdk URL which causes "Drive app access denied" errors for users who are not authenticated to the Google account that owns the file.
+Use the direct embed URL instead:
+javascriptfileUrl = `https://drive.google.com/uc?export=view&id=${driveFile.getId()}`;
+This format is publicly accessible as long as the file sharing is set to ANYONE_WITH_LINK, and renders correctly as an image src in the browser.

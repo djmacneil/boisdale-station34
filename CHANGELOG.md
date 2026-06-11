@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-06-11
+
+### Bug Fixes
+- **"Access denied: DriveApp" when non-owners post images via manage.html** — the uploaded file was created successfully in the Drive folder, but `driveFile.setSharing(...)` threw for users other than the site owner (they lack permission to change sharing on a file created in someone else's folder), aborting the whole post. Fixed by wrapping `setSharing()` in a try/catch — failure is now non-fatal since the file still inherits the parent folder's sharing.
+- **manage.html "Edit" created a duplicate post instead of updating it, "Delete" failed with "Missing field: category"** — neither `action: 'edit'` nor `action: 'delete'` had handlers in Code.gs, so both fell through to the generic post-creation path. Added dedicated handlers: `edit` updates date/category/title/body/start_date/end_date in place by `sheetRow` (file columns untouched); `delete` removes the row via `sheet.deleteRow()`.
+
+### Code.gs
+- Added `edit` and `delete` action handlers for the Posts sheet.
+- Wrapped `driveFile.setSharing()` in try/catch during post creation.
+
 ## 2026-06-04
 
 ### New Pages
