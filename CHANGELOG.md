@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-06-15
+
+### Navigation
+- **Removed "Minutes" nav link** from all pages — the standalone `firedept.html` (Meeting Minutes) page is no longer linked from the header nav.
+
+### Pages
+- **pages/firedept.html** — old Meeting Minutes page deleted; `pages/meetings.html` renamed to `pages/firedept.html`. The renamed page now serves as the canonical Fire Dept. page (linked as "Fire Dept." in the nav).
+- **pages/firedept.html (formerly meetings.html)** — added Documents and Minutes section (Drive folder `MINUTES`) above the FireDept posts grid.
+- **pages/community.html** — moved Community Documents section above the posts grid.
+- All nav links across 11 pages updated from `meetings.html` → `firedept.html`.
+
 ## 2026-06-11
 
 ### Bug Fixes

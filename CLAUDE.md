@@ -86,6 +86,16 @@ GA4 tag `G-SKSZ174GDR` is in the `<head>` of every page. When adding new HTML pa
 - Public admin: `upload.html`, `manage.html`, `events-manage.html` (root level, not in pages/)
 - Content pages: `pages/*.html`
 
+### Nav pages (in order as they appear in the header)
+| Label | File | Notes |
+|---|---|---|
+| Home | `index.html` | root |
+| Notices | `pages/notices.html` | |
+| Fire Dept. | `pages/firedept.html` | Documents + Minutes section on top, FireDept posts below |
+| Calendar | `pages/calendar.html` | |
+| Projects | `pages/projects.html` | |
+| Community | `pages/community.html` | Community Documents on top, Community posts below |
+
 ## Google Sheet Structure
 Spreadsheet ID: `1jlcWZnge9bEFGr0GIK2FfgYfcXLS5WtNkZXNKINYryw`
 Posts tab columns (0-indexed as used in JS):
