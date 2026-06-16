@@ -11,7 +11,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meeting Minutes</title>
+  <title>Fire Dept. Notices</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
 </head>
@@ -22,7 +22,7 @@
       <nav>
         <a href="../index.html">Home</a>
         <a href="notices.html">Notices</a>
-        <a href="meetings.html">Fire Dept.</a>
+        <a href="firedept.html" class="active">Fire Dept.</a>
         <a href="calendar.html">Calendar</a>
         <a href="projects.html">Projects</a>
         <a href="community.html">Community</a>
@@ -33,14 +33,17 @@
     <div class="container">
       <h1 class="page-title">Fire Department</h1>
 
-      <div id="firedept-container" class="card-grid"></div>
-
-      <br>
-
       <div class="section-panel">
         <h2>📄 Documents and Minutes</h2>
         <div id="minutes-container"></div>
       </div>
+
+      <br>
+
+      <p style="color:#666;margin-bottom:1.5rem;font-size:.95rem;">
+        Upcoming and current fire department notices.
+      </p>
+      <div id="meetings-container" class="card-grid"></div>
     </div>
   </main>
   <footer id="site-footer">
@@ -55,20 +58,20 @@
   <script src="../js/google-api.js"></script>
   <script src="../js/ui.js"></script>
   <script>
-    document.title = "Fire Department — " + CONFIG.SITE.HALL_SHORT;
-
-    UI.showLoading("firedept-container");
-    GoogleAPI.fetchPostsByCategory('FireDept')
-      .then(rows => {
-        const el = document.getElementById('firedept-container');
-        el.innerHTML = rows.map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No fire department notices at this time.</p>';
-      })
-      .catch(e => UI.showError("firedept-container", e.message));
+    document.title = "Fire Dept. Notices — " + CONFIG.SITE.HALL_SHORT;
 
     UI.showLoading("minutes-container");
     GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.MINUTES)
       .then(files => UI.renderFileList("minutes-container", files))
       .catch(e    => UI.showError("minutes-container", e.message));
+
+    UI.showLoading("meetings-container");
+    GoogleAPI.fetchPostsByCategory('FireDept')
+      .then(rows => {
+        const el = document.getElementById('meetings-container');
+        el.innerHTML = rows.map(r => UI.buildPostCard(r)).join('') || '<p class="empty-msg">No fire department notices at this time.</p>';
+      })
+      .catch(e => UI.showError("meetings-container", e.message));
     GoogleAPI.fetchConfig().then(cfg => UI.applyConfig(cfg)).catch(() => {});
   </script>
 </body>
