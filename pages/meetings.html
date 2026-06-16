@@ -25,7 +25,6 @@
         <a href="meetings.html" class="active">Fire Dept.</a>
         <a href="calendar.html">Calendar</a>
         <a href="projects.html">Projects</a>
-        <a href="firedept.html">Minutes</a>
         <a href="community.html">Community</a>
       </nav>
     </div>
@@ -33,6 +32,14 @@
   <main>
     <div class="container">
       <h1 class="page-title">Fire Department</h1>
+
+      <div class="section-panel">
+        <h2>📄 Documents and Minutes</h2>
+        <div id="minutes-container"></div>
+      </div>
+
+      <br>
+
       <p style="color:#666;margin-bottom:1.5rem;font-size:.95rem;">
         Upcoming and current fire department notices.
       </p>
@@ -52,6 +59,12 @@
   <script src="../js/ui.js"></script>
   <script>
     document.title = "Fire Dept. Notices — " + CONFIG.SITE.HALL_SHORT;
+
+    UI.showLoading("minutes-container");
+    GoogleAPI.listDriveFolder(CONFIG.DRIVE_FOLDERS.MINUTES)
+      .then(files => UI.renderFileList("minutes-container", files))
+      .catch(e    => UI.showError("minutes-container", e.message));
+
     UI.showLoading("meetings-container");
     GoogleAPI.fetchPostsByCategory('FireDept')
       .then(rows => {
