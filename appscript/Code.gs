@@ -300,6 +300,30 @@ function doPost(e) {
       sheet.getRange(sheetRow, 9).setValue((data.start_date || '').trim());
       sheet.getRange(sheetRow, 10).setValue((data.end_date || '').trim());
 
+      // ── Attachment: replace with a new file ──────────────────
+      if (data.fileBase64) {
+        let uploaded;
+        try {
+          uploaded = uploadPostFile(data);
+        } catch (uploadErr) {
+          output.setContent(JSON.stringify({ status: 'error', message: uploadErr.message }));
+          return output;
+        }
+        const oldUrl = sheet.getRange(sheetRow, 6).getValue();
+        sheet.getRange(sheetRow, 6).setValue(uploaded.fileUrl);
+        sheet.getRange(sheetRow, 7).setValue(uploaded.fileName);
+        sheet.getRange(sheetRow, 8).setValue(uploaded.fileType);
+        trashDriveFileByUrl(oldUrl);
+
+      // ── Attachment: remove with no replacement ────────────────
+      } else if (data.removeFile) {
+        const oldUrl = sheet.getRange(sheetRow, 6).getValue();
+        sheet.getRange(sheetRow, 6).setValue('');
+        sheet.getRange(sheetRow, 7).setValue('');
+        sheet.getRange(sheetRow, 8).setValue('');
+        trashDriveFileByUrl(oldUrl);
+      }
+
       output.setContent(JSON.stringify({ status: 'ok', message: 'Post updated.' }));
       return output;
     }
@@ -384,30 +408,16 @@ function doPost(e) {
     let fileType = '';
 
     if (data.fileBase64) {
-      if (!ALLOWED_TYPES.includes(data.fileType)) {
-        output.setContent(JSON.stringify({ status: 'error', message: 'File type not allowed.' }));
-        return output;
-      }
-      const approxBytes = Math.round(data.fileBase64.length * 0.75);
-      if (approxBytes > MAX_FILE_MB * 1024 * 1024) {
-        output.setContent(JSON.stringify({ status: 'error', message: `File exceeds ${MAX_FILE_MB} MB limit.` }));
-        return output;
-      }
-      const blob      = Utilities.newBlob(
-        Utilities.base64Decode(data.fileBase64), data.fileType, sanitizeFileName(data.fileName)
-      );
-      const folder    = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-      const driveFile = folder.createFile(blob);
+      let uploaded;
       try {
-        driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      } catch (shareErr) {
-        // Non-owner callers may lack permission to change sharing on a file
-        // created in someone else's folder. The file still inherits the
-        // folder's sharing, so don't block post creation over this.
+        uploaded = uploadPostFile(data);
+      } catch (uploadErr) {
+        output.setContent(JSON.stringify({ status: 'error', message: uploadErr.message }));
+        return output;
       }
-      fileUrl  = driveFile.getUrl();
-      fileName = driveFile.getName();
-      fileType = data.fileType;
+      fileUrl  = uploaded.fileUrl;
+      fileName = uploaded.fileName;
+      fileType = uploaded.fileType;
     }
 
     // ── Post: write row to Sheet ──────────────────────────────
@@ -505,6 +515,57 @@ function sanitizeFileName(name) {
     .substring(0, 200) || 'attachment';
 }
 
+/**
+ * Decode a base64 attachment from a post payload, save it to the Drive
+ * folder, and return { fileUrl, fileName, fileType }. Throws an Error with
+ * a user-facing message on validation failure — callers should catch it
+ * and write it into the JSON error response. Shared by post-create and
+ * post-edit (attachment replace).
+ */
+function uploadPostFile(data) {
+  if (!ALLOWED_TYPES.includes(data.fileType)) {
+    throw new Error('File type not allowed.');
+  }
+  const approxBytes = Math.round(data.fileBase64.length * 0.75);
+  if (approxBytes > MAX_FILE_MB * 1024 * 1024) {
+    throw new Error(`File exceeds ${MAX_FILE_MB} MB limit.`);
+  }
+  const blob      = Utilities.newBlob(
+    Utilities.base64Decode(data.fileBase64), data.fileType, sanitizeFileName(data.fileName)
+  );
+  const folder    = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  const driveFile = folder.createFile(blob);
+  try {
+    driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  } catch (shareErr) {
+    // Non-owner callers may lack permission to change sharing on a file
+    // created in someone else's folder. The file still inherits the
+    // folder's sharing, so don't block post creation over this.
+  }
+  return {
+    fileUrl:  driveFile.getUrl(),
+    fileName: driveFile.getName(),
+    fileType: data.fileType
+  };
+}
+
+/**
+ * Best-effort trash of a previously-attached Drive file, given the URL
+ * stored in the sheet (either the file/d/FILE_ID/... form from getUrl(),
+ * or a uc?export=view&id=FILE_ID form). Never throws — a caller replacing
+ * or removing an attachment should not fail just because the old file
+ * couldn't be cleaned up (already deleted, not owned by this account, etc).
+ */
+function trashDriveFileByUrl(url) {
+  if (!url) return;
+  try {
+    const match = String(url).match(/[-\w]{25,}/); // Drive file IDs are long alphanumeric/-/_ strings
+    if (match) DriveApp.getFileById(match[0]).setTrashed(true);
+  } catch (err) {
+    // Old file may already be gone, or this account may not own it — ignore.
+  }
+}
+
 // ── GET: health check + optional booking list ─────────────────
 // ?action=bookings&token=... returns all HallBookings rows as JSON.
 // No token / wrong token returns the standard version string.
@@ -544,6 +605,6 @@ function doGet(e) {
 
   // Default: version string
   return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok', service: 'BS34 Endpoint v4' }))
+    .createTextOutput(JSON.stringify({ status: 'ok', service: 'BS34 Endpoint v5' }))
     .setMimeType(ContentService.MimeType.JSON);
 }

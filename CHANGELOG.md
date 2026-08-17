@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-17
+
+### manage.html
+- **Edit panel now supports changing/removing the post attachment.** Previously the edit form only showed a static "File cannot be changed here" note. It now shows the current attachment (with a thumbnail for images) plus a **Remove** button, and a file input to replace or add an attachment, with client-side type/size validation and a pending-change preview before saving.
+
+### Code.gs
+- `edit` action now accepts `fileBase64`/`fileName`/`fileType` (uploads a new file to Drive and overwrites FileURL/FileName/FileType) or `removeFile: true` (clears those columns). The previously-attached Drive file is best-effort trashed via a new `trashDriveFileByUrl()` helper — failure to trash (already deleted, not owned by this account, etc.) never blocks the edit.
+- Extracted the base64-decode-and-upload logic shared by post-create and post-edit into `uploadPostFile()`.
+- Bumped `doGet` version string to `BS34 Endpoint v5` to make this deployment identifiable when verifying the live URL.
+
 ## 2026-06-15
 
 ### Navigation

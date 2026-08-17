@@ -217,6 +217,77 @@
     }
     .empty-msg { color: #888; font-style: italic; padding: 1rem 0; }
 
+    /* Attachment editing */
+    .attachment-block { margin-top: .2rem; }
+    .attachment-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .4rem .6rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: .5rem;
+    }
+    .attachment-row img.attachment-thumb {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+      background: #f0f0f0;
+    }
+    .attachment-row .attachment-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .attachment-row .attachment-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: .88rem;
+      color: #333;
+    }
+    .btn-att-remove {
+      padding: .25rem .6rem;
+      background: #fdecea;
+      border: 1px solid #f5aca6;
+      color: #922b21;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: .78rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .btn-att-remove:hover { background: #fbd7d4; }
+    .attachment-removed-note {
+      display: none;
+      font-size: .85rem;
+      color: #922b21;
+      margin-bottom: .5rem;
+    }
+    .attachment-removed-note.show { display: block; }
+    .btn-link {
+      background: none;
+      border: none;
+      color: #1a4abf;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: .85rem;
+      padding: 0;
+      margin-left: .3rem;
+    }
+    .attachment-block input[type="file"] {
+      font-size: .85rem;
+    }
+
     /* Category + status grouping */
     .cat-group { margin-bottom: 2rem; }
     .cat-group-header {
@@ -311,6 +382,7 @@
 
     // ── State ─────────────────────────────────────────────────────────────────
     let posts = []; // [{ sheetRow, row: [] }]
+    let editState = {}; // idx -> { fileUrl, fileName, fileType, newFile, remove }
 
     // ── Load ──────────────────────────────────────────────────────────────────
     async function loadPosts() {
@@ -415,11 +487,14 @@
 
     // ── Edit form ─────────────────────────────────────────────────────────────
     function buildEditForm(idx, p) {
-      const [, date, cat, title, body, fileUrl, fileName, , startDate, endDate] = p.row;
+      const [, date, cat, title, body, fileUrl, fileName, fileType, startDate, endDate] = p.row;
       const cats = ['Notice', 'FireDept', 'Community', 'Projects'];
       const catOptions = cats.map(c =>
         `<option value="${c}" ${c === cat ? 'selected' : ''}>${c === 'Projects' ? 'Project Update' : c}</option>`
       ).join('');
+
+      // Track this post's original attachment + edit state (new file / removal) in memory.
+      editState[idx] = { fileUrl, fileName, fileType, newFile: null, remove: false };
 
       return `
         <div class="edit-grid">
@@ -447,13 +522,123 @@
             <label>Body</label>
             <textarea id="eb-${idx}">${esc(body || '')}</textarea>
           </div>
-          ${fileUrl ? `<div class="span2 attachment-note">Attachment: ${esc(fileName || fileUrl)} &nbsp;·&nbsp; <em>File cannot be changed here — delete and re-post to change the attachment.</em></div>` : ''}
+          <div class="span2 attachment-block">
+            <label>Attachment</label>
+            ${buildAttachmentRow(idx)}
+            <input type="file" id="ef-${idx}" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf" onchange="handleEditFileSelected(${idx})">
+            <div class="attachment-note" id="ef-note-${idx}"></div>
+          </div>
         </div>
         <div class="edit-actions">
           <button class="btn-save" onclick="saveEdit(${idx}, ${p.sheetRow})">Save Changes</button>
           <button class="btn-cancel" onclick="toggleEdit(${idx})">Cancel</button>
           <span class="edit-status" id="es-msg-${idx}"></span>
         </div>`;
+    }
+
+    // ── Attachment row (current file + remove button, or removed notice) ──────
+    function driveThumbUrl(url) {
+      const m = String(url || '').match(/[-\w]{25,}/);
+      return m ? `https://drive.google.com/thumbnail?id=${m[0]}&sz=w100` : '';
+    }
+
+    function buildAttachmentRow(idx) {
+      const st = editState[idx];
+      if (st.newFile) {
+        const verb = st.fileUrl ? 'Will replace with' : 'Will attach';
+        return `<div class="attachment-row" id="att-current-${idx}">
+          <div class="attachment-icon">${st.newFile.type === 'application/pdf' ? '📄' : '🖼️'}</div>
+          <span class="attachment-name" title="${esc(st.newFile.name)}">${verb}: ${esc(st.newFile.name)} (${formatBytes(st.newFile.size)})</span>
+          <button type="button" class="btn-att-remove" onclick="cancelNewFile(${idx})">Cancel</button>
+        </div>`;
+      }
+      if (st.remove) {
+        return `<div class="attachment-removed-note show" id="att-removed-${idx}">
+          Attachment will be removed when you save.
+          <button type="button" class="btn-link" onclick="undoRemoveAttachment(${idx})">Undo</button>
+        </div>`;
+      }
+      if (!st.fileUrl) {
+        return `<div class="attachment-note">No attachment. Choose a file below to add one.</div>`;
+      }
+      const isImage = (st.fileType || '').startsWith('image/');
+      const thumb   = isImage ? driveThumbUrl(st.fileUrl) : '';
+      const thumbHtml = thumb
+        ? `<img class="attachment-thumb" src="${thumb}" alt="">`
+        : `<div class="attachment-icon">${st.fileType === 'application/pdf' ? '📄' : '📎'}</div>`;
+      return `<div class="attachment-row" id="att-current-${idx}">
+        ${thumbHtml}
+        <span class="attachment-name" title="${esc(st.fileName || st.fileUrl)}">${esc(st.fileName || st.fileUrl)}</span>
+        <button type="button" class="btn-att-remove" onclick="markRemoveAttachment(${idx})">Remove</button>
+      </div>`;
+    }
+
+    function refreshAttachmentRow(idx) {
+      const container = document.querySelector(`#edit-${idx} .attachment-block`);
+      if (!container) return;
+      // Replace just the first child (the attachment status row), leave the file input + note in place.
+      const first = container.children[1]; // 0 = label, 1 = status row
+      first.outerHTML = buildAttachmentRow(idx);
+    }
+
+    // ── Remove / undo remove ─────────────────────────────────────────────────
+    function markRemoveAttachment(idx) {
+      editState[idx].remove = true;
+      refreshAttachmentRow(idx);
+    }
+
+    function undoRemoveAttachment(idx) {
+      editState[idx].remove = false;
+      refreshAttachmentRow(idx);
+    }
+
+    function cancelNewFile(idx) {
+      editState[idx].newFile = null;
+      document.getElementById(`ef-${idx}`).value = '';
+      document.getElementById(`ef-note-${idx}`).textContent = '';
+      refreshAttachmentRow(idx);
+    }
+
+    // ── New file chosen to replace/add attachment ───────────────────────────
+    function handleEditFileSelected(idx) {
+      const input = document.getElementById(`ef-${idx}`);
+      const note  = document.getElementById(`ef-note-${idx}`);
+      const file  = input.files[0];
+      if (!file) { editState[idx].newFile = null; note.textContent = ''; refreshAttachmentRow(idx); return; }
+
+      const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+      if (!allowed.includes(file.type)) {
+        note.textContent = 'Only JPG, PNG, GIF, WEBP, or PDF files are allowed.';
+        input.value = '';
+        editState[idx].newFile = null;
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        note.textContent = 'File must be 10 MB or smaller.';
+        input.value = '';
+        editState[idx].newFile = null;
+        return;
+      }
+
+      editState[idx].newFile = file;
+      editState[idx].remove = false; // a new file replaces "remove" intent
+      note.textContent = '';
+      refreshAttachmentRow(idx);
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = e => resolve(e.target.result.split(',')[1]); // strip data URI prefix
+        reader.onerror = () => reject(new Error('FileReader error'));
+        reader.readAsDataURL(file);
+      });
     }
 
     // ── Toggle edit panel ─────────────────────────────────────────────────────
@@ -489,6 +674,21 @@
         start_date: document.getElementById(`es-${idx}`).value,
         end_date:   document.getElementById(`ee-${idx}`).value,
       };
+
+      const st = editState[idx];
+      if (st && st.newFile) {
+        setEditStatus(msgEl, 'Reading file…', 'loading');
+        try {
+          payload.fileBase64 = await fileToBase64(st.newFile);
+          payload.fileName   = st.newFile.name;
+          payload.fileType   = st.newFile.type;
+        } catch (err) {
+          setEditStatus(msgEl, 'Failed to read the file. Please try again.', 'error');
+          return;
+        }
+      } else if (st && st.remove) {
+        payload.removeFile = true;
+      }
 
       setEditStatus(msgEl, 'Saving…', 'loading');
 
