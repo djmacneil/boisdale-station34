@@ -216,7 +216,7 @@ nav a:hover, nav a.active {
 }
 .hero p { font-size: 1.05rem; opacity: .9; }
 .hero-note { font-size: .9rem; margin-top: .35rem; }
-.hero-note a { color: inherit; text-decoration: underline; }
+.hero-note a { color: var(--white); text-decoration: underline; }
 .hero-img {
   height: 90px;
   width: auto;
